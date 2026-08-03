@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minha conta — Dos Guri Imports</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="navrow">
+    <a class="logo" href="index.html">
+      <span class="brand">Dos Guri <b>Imports</b></span>
+      <span class="tag">Curadoria importada</span>
+    </a>
+    <div class="head-actions push">
+      <a class="acct" href="index.html" title="Voltar à loja">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        <span>Voltar à loja</span>
+      </a>
+      <button class="theme-toggle" id="themeBtn" aria-label="Alternar tema" title="Alternar tema">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <!-- Área de login/cadastro -->
+  <div id="authView" class="auth-wrap" style="display:none">
+    <div class="page-head" style="text-align:center">
+      <span class="eyebrow">Área do cliente</span>
+      <h1>Minha conta</h1>
+      <p style="margin:0 auto">Entre para acompanhar seus pedidos e agilizar suas compras.</p>
+    </div>
+
+    <div class="demo-note"><span>🔒</span><div><b>Login seguro:</b> sua conta é protegida pelo Supabase. Seus dados e pedidos ficam salvos com segurança e acessíveis de qualquer aparelho.</div></div>
+
+    <div class="panel-box">
+      <div class="tabswitch">
+        <button id="tabLogin" class="active">Entrar</button>
+        <button id="tabSignup">Criar conta</button>
+      </div>
+
+      <div id="msg"></div>
+
+      <!-- Login -->
+      <form id="formLogin">
+        <div class="field"><label>E-mail</label><input type="email" id="loginEmail" placeholder="voce@email.com" required></div>
+        <div class="field"><label>Senha</label><input type="password" id="loginPass" placeholder="Sua senha" required></div>
+        <button class="btn solid block" type="submit">Entrar</button>
+      </form>
+
+      <!-- Cadastro -->
+      <form id="formSignup" style="display:none">
+        <div class="field"><label>Nome completo</label><input type="text" id="suName" placeholder="Seu nome" required></div>
+        <div class="field"><label>E-mail</label><input type="email" id="suEmail" placeholder="voce@email.com" required></div>
+        <div class="field"><label>Senha</label><input type="password" id="suPass" placeholder="Crie uma senha" required minlength="4"></div>
+        <button class="btn solid block" type="submit">Criar conta</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Área logada -->
+  <div id="accountView" style="display:none">
+    <div class="page-head">
+      <span class="eyebrow">Bem-vindo(a)</span>
+      <h1 id="helloName">Olá!</h1>
+      <p id="helloEmail" style="color:var(--ink-mute)"></p>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:26px">
+      <a class="btn" href="index.html">Continuar comprando</a>
+      <button class="btn danger" id="logoutBtn">Sair da conta</button>
+    </div>
+
+    <h2 style="font-family:var(--serif); font-weight:400; font-size:26px; margin:0 0 16px">Meus pedidos</h2>
+    <div id="ordersList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Feito ✓</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next') || 'index.html';
+
+  let toastT;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1600); }
+  function showMsg(text, ok){ document.getElementById('msg').innerHTML = `<div class="form-msg ${ok?'ok':'err'}">${text}</div>`; }
+
+  // alterna Login / Cadastro
+  const tabLogin = document.getElementById('tabLogin'), tabSignup = document.getElementById('tabSignup');
+  const formLogin = document.getElementById('formLogin'), formSignup = document.getElementById('formSignup');
+  tabLogin.addEventListener('click', () => {
+    tabLogin.classList.add('active'); tabSignup.classList.remove('active');
+    formLogin.style.display=''; formSignup.style.display='none'; document.getElementById('msg').innerHTML='';
+  });
+  tabSignup.addEventListener('click', () => {
+    tabSignup.classList.add('active'); tabLogin.classList.remove('active');
+    formSignup.style.display=''; formLogin.style.display='none'; document.getElementById('msg').innerHTML='';
+  });
+
+  // cadastro
+  formSignup.addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById('suName').value.trim();
+    const email = document.getElementById('suEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('suPass').value;
+    const btn = formSignup.querySelector('button[type=submit]');
+    btn.disabled = true;
+    try {
+      const data = await Store.signUp(name, email, pass);
+      if (data.session) {
+        location.href = next; // entrou na hora
+      } else {
+        showMsg('Conta criada! Enviamos um e-mail de confirmação. Confirme e depois entre.', true);
+        tabLogin.click();
+      }
+    } catch (err) {
+      showMsg(friendlyError(err), false);
+    } finally { btn.disabled = false; }
+  });
+
+  // login
+  formLogin.addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const pass = document.getElementById('loginPass').value;
+    const btn = formLogin.querySelector('button[type=submit]');
+    btn.disabled = true;
+    try {
+      await Store.signIn(email, pass);
+      location.href = next;
+    } catch (err) {
+      showMsg(friendlyError(err), false);
+    } finally { btn.disabled = false; }
+  });
+
+  // logout
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => { await Store.signOut(); render(); });
+
+  async function render() {
+    const s = await Store.session();
+    if (s && s.type) {
+      document.getElementById('authView').style.display='none';
+      document.getElementById('accountView').style.display='';
+      document.getElementById('helloName').textContent = 'Olá, ' + (s.name||'').split(' ')[0] + '!';
+      document.getElementById('helloEmail').textContent = s.email;
+      const list = document.getElementById('ordersList');
+      list.innerHTML = '<div class="empty">Carregando seus pedidos…</div>';
+      const mine = await Store.orders(); // o banco já devolve só os do próprio cliente
+      if (mine.length===0) {
+        list.innerHTML = '<div class="empty">Você ainda não fez pedidos.<br>Que tal dar uma olhada na loja? ✦</div>';
+      } else {
+        list.innerHTML = mine.map(o => `
+          <div class="order">
+            <div class="oh"><span>Pedido #${String(o.id).slice(-6)}</span><span>${o.date}</span></div>
+            <div class="oi">${o.items.map(i=>`${i.qty}× ${i.name}${i.sub?' ('+i.sub+')':''}`).join('<br>')}</div>
+            <div class="ot">Total: ${money(o.total)}</div>
+          </div>`).join('');
+      }
+    } else {
+      document.getElementById('accountView').style.display='none';
+      document.getElementById('authView').style.display='';
+    }
+  }
+
+  wireTheme('themeBtn');
+  render();
+</script>
+</body>
+</html>

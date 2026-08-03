@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produto — Dos Guri Imports</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .crumb { font-size: 12.5px; color: var(--ink-mute); padding: 22px 0 6px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .crumb a:hover { color: var(--gold); }
+  .crumb .sep { opacity: .5; }
+  .crumb .cur { color: var(--ink-soft); }
+
+  .product { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; padding: 20px 0 60px; align-items: start; }
+  .gallery { position: sticky; top: 120px; }
+  .stage { aspect-ratio: 1/1; border-radius: 10px; border: 1px solid var(--line); background: radial-gradient(120% 100% at 50% 15%, var(--ground-2), var(--card)); display: grid; place-items: center; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+  .stage .glow { position: absolute; inset: -20% 30% auto -10%; height: 55%; background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 34%, transparent), transparent); filter: blur(34px); }
+  .stage .big { font-size: 150px; line-height: 1; position: relative; z-index: 1; }
+  .stage img { width: 100%; height: 100%; object-fit: cover; }
+  .stage .tag-new { position: absolute; top: 16px; left: 16px; z-index: 2; font-size: 11px; font-weight: 700; letter-spacing: .05em; background: var(--sale); color: #14110F; padding: 5px 11px; border-radius: 999px; }
+
+  .info { padding-top: 4px; }
+  .brandline { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; }
+  .info h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 4vw, 44px); line-height: 1.08; margin: 0 0 14px; letter-spacing: -.01em; text-wrap: balance; }
+  .rating { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-mute); margin-bottom: 22px; }
+  .rating .s { color: var(--gold); letter-spacing: 2px; font-size: 15px; }
+
+  .pricebox { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .pricebox .now { font-family: var(--serif); font-size: 40px; line-height: 1; }
+  .pricebox .was { font-size: 17px; color: var(--ink-mute); text-decoration: line-through; }
+  .pricebox .off { font-size: 12px; font-weight: 700; background: color-mix(in srgb, var(--sale) 20%, transparent); color: var(--sale); padding: 5px 10px; border-radius: 999px; }
+  .installline { font-size: 14px; color: var(--ink-soft); margin: 12px 0 0; }
+  .installline b { color: var(--ink); }
+  .pixline { font-size: 13px; color: var(--good); margin-top: 4px; }
+
+  .opt-group { margin: 26px 0 0; }
+  .opt-group .lbl { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 12px; display: flex; gap: 8px; }
+  .opt-group .lbl b { color: var(--ink); font-weight: 600; letter-spacing: normal; text-transform: none; }
+  .opts { display: flex; gap: 10px; flex-wrap: wrap; }
+  .opt { padding: 11px 20px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink-soft); font-size: 14px; transition: .2s; }
+  .opt:hover { border-color: var(--gold); color: var(--ink); }
+  .opt.active { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--ink); font-weight: 600; }
+
+  .buyrow { display: flex; gap: 14px; margin: 30px 0 0; align-items: stretch; }
+  .qty { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .qty button { width: 44px; background: transparent; border: none; color: var(--ink); font-size: 18px; }
+  .qty button:hover { color: var(--gold); }
+  .qty span { min-width: 30px; text-align: center; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .buyrow .btn.solid { flex: 1; }
+
+  .assur { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-top: 28px; }
+  .assur .a { display: flex; gap: 11px; align-items: flex-start; font-size: 13px; color: var(--ink-soft); }
+  .assur .ic { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+  .assur b { color: var(--ink); font-weight: 600; }
+
+  .tabs { border-top: 1px solid var(--line); padding: 54px 0; }
+  .tabnav { display: flex; gap: 26px; border-bottom: 1px solid var(--line); margin-bottom: 30px; flex-wrap: wrap; }
+  .tabnav button { background: none; border: none; color: var(--ink-mute); font-size: 15px; padding: 0 0 16px; position: relative; }
+  .tabnav button:hover { color: var(--ink); }
+  .tabnav button.active { color: var(--ink); }
+  .tabnav button.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--gold); }
+  .panel { display: none; max-width: 760px; }
+  .panel.active { display: block; }
+  .panel p { color: var(--ink-soft); font-size: 15.5px; margin: 0 0 16px; }
+  .spectable { width: 100%; border-collapse: collapse; }
+  .spectable td { padding: 13px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .spectable td:first-child { color: var(--ink-mute); width: 40%; }
+  .spectable td:last-child { color: var(--ink); }
+  .rev-sum { display: flex; gap: 40px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .rev-big { font-family: var(--serif); font-size: 60px; line-height: 1; }
+  .rev-sum .s { color: var(--gold); font-size: 18px; letter-spacing: 2px; }
+  .rev-sum .cnt { color: var(--ink-mute); font-size: 13px; margin-top: 4px; }
+
+  .related { border-top: 1px solid var(--line); padding: 54px 0 20px; }
+  .related h2 { font-family: var(--serif); font-weight: 400; font-size: 30px; margin: 0 0 28px; }
+  .rel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .rcard { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; transition: .25s; }
+  .rcard:hover { transform: translateY(-5px); border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); box-shadow: var(--shadow); }
+  .rcard .m { aspect-ratio: 1/1; display: grid; place-items: center; font-size: 50px; background: radial-gradient(120% 100% at 50% 20%, var(--ground-2), var(--card)); overflow: hidden; }
+  .rcard .m img { width: 100%; height: 100%; object-fit: cover; }
+  .rcard .b { padding: 14px 15px 16px; }
+  .rcard .bn { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
+  .rcard .nm { font-size: 14px; font-weight: 600; margin: 5px 0 8px; line-height: 1.3; }
+  .rcard .pr { font-family: var(--serif); font-size: 19px; }
+
+  @media (max-width: 980px) {
+    .product { grid-template-columns: 1fr; gap: 34px; }
+    .gallery { position: static; }
+    .rel-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .info h1 { font-size: 30px; }
+    .pricebox .now { font-size: 34px; }
+    .opt { padding: 13px 22px; font-size: 15px; }
+    .qty button { width: 48px; font-size: 20px; }
+    .btn { padding: 16px 24px; font-size: 15.5px; }
+    .assur { grid-template-columns: 1fr; }
+    .related h2 { font-size: 26px; }
+  }
+  @media (max-width: 400px) { .rel-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">Parcele em até <b>12x sem juros</b> · Entrega feita pela própria loja · Produtos 100% originais</div>
+  <div class="navrow">
+    <a class="logo" href="index.html">
+      <span class="brand">Dos Guri <b>Imports</b></span>
+      <span class="tag">Curadoria importada</span>
+    </a>
+    <nav class="main">
+      <a href="index.html#cats">Categorias</a><a href="index.html#ofertas">Novidades</a><a href="index.html#ofertas">Ofertas</a>
+    </nav>
+    <label class="search" style="margin-left:auto">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar…" aria-label="Buscar" onkeydown="if(event.key==='Enter'){location.href='index.html'}">
+    </label>
+    <div class="head-actions">
+      <a class="acct" id="acctLink" href="conta.html" title="Minha conta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span>Entrar</span>
+      </a>
+      <button class="theme-toggle" id="themeBtn" aria-label="Alternar tema" title="Alternar tema">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="iconbtn" id="cartBtn" aria-label="Carrinho">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="crumb">
+    <a href="index.html">Início</a><span class="sep">/</span>
+    <a href="index.html#ofertas" id="crumbCat">Produtos</a><span class="sep">/</span>
+    <span class="cur" id="crumbName">—</span>
+  </div>
+
+  <div class="product">
+    <div class="gallery">
+      <div class="stage">
+        <span class="tag-new" id="stageBadge">-30%</span>
+        <div class="glow"></div>
+        <div id="stageImg" class="big">🧴</div>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="brandline" id="brandLine">—</div>
+      <h1 id="prodName">—</h1>
+      <div class="rating">
+        <span class="s" id="ratingStars">★★★★★</span>
+        <span id="ratingVal">0</span><span class="sep">·</span>
+        <span id="ratingCount">0 avaliações</span>
+      </div>
+
+      <div class="pricebox">
+        <span class="now" id="price">R$ 0</span>
+        <span class="was" id="priceWas">R$ 0</span>
+        <span class="off" id="priceOff">-30%</span>
+      </div>
+      <p class="installline" id="installLine"></p>
+      <p class="pixline" id="pixLine"></p>
+
+      <div class="opt-group" id="optGroup">
+        <div class="lbl"><span id="optType">Opção</span>: <b id="optLabel">—</b></div>
+        <div class="opts" id="opts"></div>
+      </div>
+
+      <div class="buyrow">
+        <div class="qty">
+          <button id="minus" aria-label="Diminuir">−</button>
+          <span id="qtyVal">1</span>
+          <button id="plus" aria-label="Aumentar">+</button>
+        </div>
+        <button class="btn solid" id="addBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Adicionar ao carrinho
+        </button>
+      </div>
+      <button class="btn block" id="buyNow" style="margin-top:12px">Comprar agora</button>
+
+      <div class="assur">
+        <div class="a"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg><span><b>100% Original</b> — com garantia e nota fiscal.</span></div>
+        <div class="a"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="15" height="11" rx="2"/><path d="M16 9h4l3 3v5h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><span><b>Entrega própria</b> — a gente mesmo leva até você.</span></div>
+        <div class="a"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span><b>Pix e 12x</b> — pague como preferir.</span></div>
+        <div class="a"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 9 9M3 12a9 9 0 0 0 9 9M8 12l3 3 5-6"/></svg><span><b>Troca fácil</b> — 7 dias para trocar.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tabnav">
+      <button class="active" data-tab="desc">Descrição</button>
+      <button data-tab="spec">Especificações</button>
+      <button data-tab="rev">Avaliações</button>
+    </div>
+    <div class="panel active" data-panel="desc" id="panelDesc"></div>
+    <div class="panel" data-panel="spec" id="panelSpec"></div>
+    <div class="panel" data-panel="rev" id="panelRev"></div>
+  </div>
+
+  <div class="related">
+    <h2>Você também pode gostar</h2>
+    <div class="rel-grid" id="relGrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap"><div class="foot-bottom">
+    <span>© 2026 Dos Guri Imports · Curadoria de importados originais.</span>
+    <div class="pay"><span>PIX</span><span>VISA</span><span>MASTER</span><span>ELO</span><span>BOLETO</span></div>
+  </div></div>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="Carrinho">
+  <div class="drawer-head"><h3>Seu carrinho</h3><button id="closeCart" aria-label="Fechar">✕</button></div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot">
+    <div class="sumrow"><span>Subtotal</span><span id="subtotal">R$ 0</span></div>
+    <div class="sumrow"><span>Frete</span><span>Combinar na entrega</span></div>
+    <div class="sumrow total"><span>Total</span><b id="total">R$ 0</b></div>
+    <button class="btn solid" id="checkoutBtn">Finalizar compra
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="toast" id="toast">Adicionado ao carrinho ✓</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  let P = null;
+  let curOpt = null;
+  let qty = 1;
+  let cart = Store.cart();
+
+  function stageImg() {
+    return P.image ? `<img src="${P.image}" alt="${P.name}">` : `<div class="big">${P.glyph||'📦'}</div>`;
+  }
+
+  async function renderStatic() {
+    document.title = P.name + ' — Dos Guri Imports';
+    document.getElementById('crumbCat').textContent = CATS[P.cat] || 'Produtos';
+    document.getElementById('crumbName').textContent = P.name;
+    document.getElementById('brandLine').textContent = P.brand + (P.origin ? ' · ' + P.origin : '');
+    document.getElementById('prodName').textContent = P.name;
+    document.querySelector('.stage').insertBefore(document.createRange().createContextualFragment(stageImg()), null);
+    // remove placeholder default and show correct
+    const st = document.getElementById('stageImg'); if (st) st.remove();
+    document.getElementById('ratingStars').textContent = starStr(P.rating);
+    document.getElementById('ratingVal').textContent = Number(P.rating).toFixed(1).replace('.', ',');
+    document.getElementById('ratingCount').textContent = P.reviews + ' avaliações';
+
+    const badge = document.getElementById('stageBadge');
+    if (P.badge) { badge.textContent = P.badge; badge.style.display=''; } else { badge.style.display='none'; }
+
+    // opções
+    if (P.options && P.options.length) {
+      document.getElementById('optGroup').style.display = '';
+      document.getElementById('optType').textContent = P.optLabel || 'Opção';
+      document.getElementById('opts').innerHTML = P.options.map((o,i) =>
+        `<button class="opt ${i===0?'active':''}" data-o="${o}">${o}</button>`).join('');
+      document.getElementById('opts').addEventListener('click', e => {
+        const b = e.target.closest('.opt'); if(!b) return;
+        document.querySelectorAll('.opt').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active'); curOpt = b.dataset.o;
+        document.getElementById('optLabel').textContent = curOpt;
+      });
+    } else {
+      document.getElementById('optGroup').style.display = 'none';
+    }
+
+    // preço
+    document.getElementById('price').textContent = money(P.price);
+    const wasEl = document.getElementById('priceWas'), offEl = document.getElementById('priceOff');
+    if (P.was) { wasEl.textContent = money(P.was); wasEl.style.display=''; } else { wasEl.style.display='none'; }
+    if (P.badge) { offEl.textContent = P.badge; offEl.style.display=''; } else { offEl.style.display='none'; }
+    document.getElementById('installLine').innerHTML = 'ou <b>12x de ' + money(Math.round(P.price/12)) + '</b> sem juros no cartão';
+    document.getElementById('pixLine').textContent = money(Math.round(P.price*0.95)) + ' à vista no Pix (5% de desconto)';
+    document.getElementById('optLabel').textContent = curOpt || '—';
+
+    // abas
+    document.getElementById('panelDesc').innerHTML = `<p>${P.desc || 'Produto importado original, com garantia Dos Guri Imports.'}</p>`;
+    document.getElementById('panelSpec').innerHTML = '<table class="spectable">' +
+      [['Marca',P.brand],['Origem',P.origin||'—'],['Categoria',CATS[P.cat]||'—'],
+       (P.options&&P.options.length)?[P.optLabel||'Opções', P.options.join(' · ')]:null,
+       ['Garantia','12 meses']].filter(Boolean).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('') + '</table>';
+    document.getElementById('panelRev').innerHTML =
+      `<div class="rev-sum"><div><div class="rev-big">${Number(P.rating).toFixed(1).replace('.', ',')}</div>
+        <div class="s">${starStr(P.rating)}</div><div class="cnt">${P.reviews} avaliações</div></div>
+        <p style="max-width:34ch;color:var(--ink-soft);font-size:14.5px;">A maioria dos clientes recomenda este produto pela <b style="color:var(--ink)">qualidade</b> e <b style="color:var(--ink)">originalidade</b>.</p></div>
+      <p style="color:var(--ink-mute);font-size:13.5px">As avaliações dos clientes aparecerão aqui.</p>`;
+    document.querySelector('[data-tab="rev"]').textContent = 'Avaliações (' + P.reviews + ')';
+
+    // relacionados
+    const others = (await Store.products()).filter(p => String(p.id)!==String(P.id)).slice(0,4);
+    document.getElementById('relGrid').innerHTML = others.map(o =>
+      `<a class="rcard" href="produto.html?id=${o.id}"><div class="m">${o.image?`<img src="${o.image}" alt="">`:(o.glyph||'📦')}</div>
+        <div class="b"><div class="bn">${o.brand}</div><div class="nm">${o.name}</div><div class="pr">${money(o.price)}</div></div></a>`).join('');
+  }
+
+  // quantidade
+  document.getElementById('plus').addEventListener('click', () => { qty++; document.getElementById('qtyVal').textContent = qty; });
+  document.getElementById('minus').addEventListener('click', () => { if(qty>1){ qty--; document.getElementById('qtyVal').textContent = qty; } });
+
+  // abas
+  document.querySelector('.tabnav').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('.tabnav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelector(`.panel[data-panel="${b.dataset.tab}"]`).classList.add('active');
+  });
+
+  // carrinho
+  const drawer = document.getElementById('drawer'), overlay = document.getElementById('overlay');
+  const openCart = () => { drawer.classList.add('open'); overlay.classList.add('open'); };
+  const closeCart = () => { drawer.classList.remove('open'); overlay.classList.remove('open'); };
+  document.getElementById('cartBtn').addEventListener('click', openCart);
+  document.getElementById('closeCart').addEventListener('click', closeCart);
+  overlay.addEventListener('click', closeCart);
+
+  let toastT;
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1800); }
+
+  function addToCart(open) {
+    if (!P) return;
+    const key = 'p' + P.id + (curOpt ? '-' + curOpt : '');
+    const found = cart.find(i => i.key===key);
+    if (found) found.qty += qty; else cart.push({ key, name:P.name, sub:curOpt||P.brand, glyph:P.glyph, image:P.image, price:P.price, qty });
+    Store.saveCart(cart); updateCart();
+    toast(qty + (qty>1?' itens adicionados':' item adicionado') + ' ✓');
+    if (open) openCart();
+  }
+  document.getElementById('addBtn').addEventListener('click', () => addToCart(true));
+  document.getElementById('buyNow').addEventListener('click', () => addToCart(true));
+
+  function updateCart() {
+    const body = document.getElementById('cartBody');
+    document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+    if (cart.length===0) {
+      body.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.</div>';
+    } else {
+      body.innerHTML = cart.map(i => `
+        <div class="citem">
+          <div class="th">${i.image?`<img src="${i.image}" alt="">`:(i.glyph||'📦')}</div>
+          <div><div class="cn">${i.name}</div>${i.sub?`<div class="csub">${i.sub}</div>`:''}
+            <div class="cp">${money(i.price)} ${i.qty>1?`× ${i.qty}`:''}</div></div>
+          <button class="rm" data-key="${i.key}">Remover</button>
+        </div>`).join('');
+      body.querySelectorAll('.rm').forEach(b => b.addEventListener('click', () => { cart = cart.filter(i=>i.key!==b.dataset.key); Store.saveCart(cart); updateCart(); }));
+    }
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    document.getElementById('subtotal').textContent = money(subtotal);
+    document.getElementById('total').textContent = money(subtotal);
+  }
+
+  document.getElementById('checkoutBtn').addEventListener('click', async () => {
+    if (cart.length===0) { toast('Seu carrinho está vazio'); return; }
+    const s = await Store.session();
+    if (!s || s.type!=='cliente') { alert('Entre na sua conta para finalizar o pedido.'); location.href='conta.html'; return; }
+    const btn = document.getElementById('checkoutBtn');
+    btn.disabled = true;
+    try {
+      await Store.createOrder(
+        cart.map(i=>({name:i.name, sub:i.sub, price:i.price, qty:i.qty})),
+        cart.reduce((a,i)=>a+i.price*i.qty,0),
+        s);
+      cart = []; Store.saveCart(cart); updateCart(); closeCart();
+      toast('Pedido registrado! ✓');
+    } catch (err) {
+      toast('Não foi possível finalizar: ' + friendlyError(err));
+    } finally { btn.disabled = false; }
+  });
+
+  wireTheme('themeBtn');
+  renderAccountLink('acctLink');
+  updateCart();
+  (async () => {
+    P = await Store.product(params.get('id'));
+    if (!P) { const all = await Store.products(); P = all[0]; }
+    if (!P) { document.getElementById('prodName').textContent = 'Produto não encontrado'; document.getElementById('brandLine').textContent = ''; return; }
+    curOpt = (P.options && P.options.length) ? P.options[0] : null;
+    await renderStatic();
+  })();
+</script>
+</body>
+</html>

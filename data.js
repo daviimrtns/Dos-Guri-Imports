@@ -1,0 +1,219 @@
+/* ============================================================
+   Dos Guri Imports — dados e utilidades compartilhadas
+   ------------------------------------------------------------
+   FASE 2: conectado ao Supabase (login seguro + banco de dados
+   de verdade). Produtos e pedidos ficam no banco e valem para
+   todos os visitantes. O carrinho continua no navegador (é algo
+   pessoal e temporário, não precisa ir para o banco).
+   ============================================================ */
+
+/* ---- Conexão com o Supabase (valores PÚBLICOS, podem ir no site) ---- */
+const SUPABASE_URL  = 'https://lqonaodfjvewgdivrdla.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb25hb2RmanZld2dkaXZyZGxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODg5ODUsImV4cCI6MjEwMTM2NDk4NX0.SdvNcyt1xmKrw9KNtxTVqQOY39BWvFkMBrr-VaeAwXk';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+/* Categorias fixas da loja (chave -> rótulo exibido) */
+const CATS = {
+  perfume: 'Perfumes',
+  fone: 'Fones',
+  celular: 'Celulares',
+  bike: 'Bikes elétricas',
+  mala: 'Malas',
+};
+
+/* Catálogo inicial — usado só para "Restaurar catálogo" no painel do dono. */
+const DEFAULT_PRODUCTS = [
+  { cat:'perfume', name:'Eau de Parfum Noir', brand:'Maison Lumière', origin:'França', glyph:'🧴', image:'', price:589, was:820, badge:'-30%', rating:4.9, reviews:214, bestseller:true, stock:8,
+    optLabel:'Tamanho', options:['50 ml','100 ml','150 ml'],
+    desc:'Fragrância amadeirada e envolvente, com notas de âmbar, baunilha e madeiras nobres. Importada da França, com lacre original e garantia Dos Guri Imports.' },
+  { cat:'fone', name:'Fone Bluetooth ANC Pro', brand:'AudioLab', origin:'EUA', glyph:'🎧', image:'', price:749, was:999, badge:'-25%', rating:4.8, reviews:512, bestseller:true, stock:15,
+    optLabel:'Cor', options:['Preto','Branco','Areia'],
+    desc:'Cancelamento de ruído ativo, som de alta fidelidade e até 40h de bateria. Bluetooth 5.3. Original, com garantia Dos Guri Imports.' },
+  { cat:'celular', name:'Smartphone Ultra 256GB', brand:'Nexon', origin:'Coreia do Sul', glyph:'📱', image:'', price:3299, was:3899, badge:'', rating:4.7, reviews:88, bestseller:false, stock:5,
+    optLabel:'Armazenamento', options:['256 GB','512 GB'],
+    desc:'Tela AMOLED 6.7" 120Hz, câmera tripla de 108MP e bateria de 5000mAh. Aparelho novo, lacrado e original, com garantia Dos Guri Imports.' },
+  { cat:'bike', name:'Bike Elétrica Urban 350W', brand:'VoltRide', origin:'Alemanha', glyph:'🚲', image:'', price:6490, was:7490, badge:'-13%', rating:4.9, reviews:37, bestseller:false, stock:3,
+    optLabel:'Tamanho do quadro', options:['Aro 26 (M)','Aro 29 (G)'],
+    desc:'Motor de 350W, autonomia de até 60km, pedal assistido e freios a disco. Entregue montada e revisada, com garantia Dos Guri Imports.' },
+  { cat:'mala', name:'Mala de Bordo Rígida 20"', brand:'TravelCo', origin:'Itália', glyph:'🧳', image:'', price:459, was:640, badge:'-28%', rating:4.6, reviews:156, bestseller:false, stock:20,
+    optLabel:'Cor', options:['Preto','Prata','Vinho'],
+    desc:'Casco em ABS resistente, 4 rodas giratórias 360° e cadeado TSA embutido. Tamanho aprovado para bagagem de mão. Original, com garantia Dos Guri Imports.' },
+  { cat:'perfume', name:'Perfume Floral Blossom 75ml', brand:'Fleur Paris', origin:'França', glyph:'🌸', image:'', price:399, was:520, badge:'', rating:4.9, reviews:301, bestseller:true, stock:12,
+    optLabel:'Tamanho', options:['50 ml','75 ml','100 ml'],
+    desc:'Fragrância leve e floral, com notas de jasmim, peônia e almíscar. Perfeita para o dia a dia. Importada da França, com garantia Dos Guri Imports.' },
+  { cat:'fone', name:'Earbuds True Wireless Mini', brand:'AudioLab', origin:'EUA', glyph:'🎵', image:'', price:289, was:389, badge:'-26%', rating:4.7, reviews:420, bestseller:false, stock:25,
+    optLabel:'Cor', options:['Preto','Branco'],
+    desc:'Compactos, leves e com ótima qualidade de som. Estojo com carga para o dia todo e resistência IPX4. Originais, com garantia Dos Guri Imports.' },
+  { cat:'celular', name:'Smartphone Lite 128GB', brand:'Nexon', origin:'Coreia do Sul', glyph:'📲', image:'', price:1799, was:2099, badge:'', rating:4.6, reviews:143, bestseller:false, stock:9,
+    optLabel:'Armazenamento', options:['128 GB','256 GB'],
+    desc:'Ótimo desempenho para o dia a dia, tela de 6.5" 90Hz e bateria de 5000mAh. Excelente custo-benefício. Novo, lacrado e original, com garantia Dos Guri Imports.' },
+];
+
+/* ------------------------------------------------------------
+   Conversão entre a linha do banco e o objeto usado nas páginas.
+   (No banco algumas colunas têm nomes diferentes: descricao,
+   opt_label, options; aqui viram desc, optLabel, options.)
+   ------------------------------------------------------------ */
+function rowToProduct(r) {
+  return {
+    id: r.id, cat: r.cat, name: r.name, brand: r.brand || '', origin: r.origin || '',
+    glyph: r.glyph || '', image: r.image || '',
+    price: Number(r.price) || 0, was: (r.was == null ? '' : Number(r.was)),
+    badge: r.badge || '', rating: (r.rating == null ? 5 : Number(r.rating)), reviews: r.reviews || 0,
+    bestseller: !!r.bestseller, stock: r.stock || 0,
+    optLabel: r.opt_label || '', options: r.options || [], desc: r.descricao || '',
+  };
+}
+function productToRow(p) {
+  return {
+    name: p.name, brand: p.brand || null, origin: p.origin || null, cat: p.cat,
+    price: p.price || 0, was: (p.was === '' || p.was == null ? null : p.was),
+    badge: p.badge || null, glyph: p.glyph || null, image: p.image || null,
+    rating: (p.rating == null ? 5 : p.rating), reviews: p.reviews || 0,
+    opt_label: p.optLabel || null, options: p.options || [], descricao: p.desc || null,
+    stock: p.stock || 0, bestseller: !!p.bestseller,
+  };
+}
+
+/* Normaliza um pedido do banco para o formato que as telas usam. */
+function rowToOrder(r) {
+  const payload = r.items || {};
+  const lines = Array.isArray(payload) ? payload : (payload.lines || []);
+  return {
+    id: r.id,
+    email: payload.buyer_email || '',
+    name: payload.buyer_name || '',
+    date: r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '',
+    items: lines,
+    total: Number(r.total) || 0,
+  };
+}
+
+/* ------------------------------------------------------------
+   Store: agora conversa com o Supabase (produtos, pedidos, login).
+   Quase tudo é assíncrono (retorna Promise) — por isso as páginas
+   usam "await".
+   ------------------------------------------------------------ */
+const Store = {
+  CART_KEY: 'dgi_cart',
+
+  /* ---------- Produtos ---------- */
+  async products() {
+    const { data, error } = await sb.from('products').select('*').order('id', { ascending: true });
+    if (error) { console.error('Erro ao carregar produtos:', error); return []; }
+    return data.map(rowToProduct);
+  },
+  async product(id) {
+    if (id == null) return null;
+    const { data, error } = await sb.from('products').select('*').eq('id', id).maybeSingle();
+    if (error || !data) return null;
+    return rowToProduct(data);
+  },
+  async upsertProduct(prod) {
+    const row = productToRow(prod);
+    if (prod.id) {
+      const { error } = await sb.from('products').update(row).eq('id', prod.id);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('products').insert(row);
+      if (error) throw error;
+    }
+  },
+  async deleteProduct(id) {
+    const { error } = await sb.from('products').delete().eq('id', id);
+    if (error) throw error;
+  },
+  /* Recria o catálogo com os produtos de exemplo (só o dono consegue). */
+  async seedDefaults() {
+    const { error: delErr } = await sb.from('products').delete().gte('id', 0);
+    if (delErr) throw delErr;
+    const { error } = await sb.from('products').insert(DEFAULT_PRODUCTS.map(productToRow));
+    if (error) throw error;
+  },
+
+  /* ---------- Carrinho (continua no navegador) ---------- */
+  cart() { try { return JSON.parse(localStorage.getItem(this.CART_KEY)) || []; } catch (e) { return []; } },
+  saveCart(c) { try { localStorage.setItem(this.CART_KEY, JSON.stringify(c)); } catch (e) {} },
+
+  /* ---------- Login / sessão (Supabase Auth) ---------- */
+  async session() {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return null;
+    let role = 'cliente', name = user.email;
+    const { data: prof } = await sb.from('profiles').select('name, role').eq('id', user.id).maybeSingle();
+    if (prof) { role = prof.role || 'cliente'; name = prof.name || user.email; }
+    return { type: role === 'dono' ? 'dono' : 'cliente', id: user.id, email: user.email, name };
+  },
+  async signUp(name, email, pass) {
+    const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { name } } });
+    if (error) throw error;
+    return data; // data.session != null => já entrou; senão precisa confirmar e-mail
+  },
+  async signIn(email, pass) {
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
+  },
+  async signOut() { await sb.auth.signOut(); },
+
+  /* ---------- Pedidos ---------- */
+  // Cliente vê os seus; dono vê todos (a segurança é garantida pelo banco/RLS).
+  async orders() {
+    const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
+    if (error) { console.error('Erro ao carregar pedidos:', error); return []; }
+    return data.map(rowToOrder);
+  },
+  async createOrder(items, total, buyer) {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Entre na sua conta para finalizar o pedido.');
+    const payload = { buyer_name: buyer?.name || '', buyer_email: buyer?.email || user.email, lines: items };
+    const { error } = await sb.from('orders').insert({ user_id: user.id, items: payload, total });
+    if (error) throw error;
+  },
+};
+
+/* Traduz mensagens de erro comuns do Supabase para português. */
+function friendlyError(err) {
+  const m = (err && err.message) ? err.message : String(err || 'Erro desconhecido');
+  if (/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/User already registered/i.test(m)) return 'Este e-mail já tem conta. Tente entrar.';
+  if (/Password should be at least/i.test(m)) return 'A senha é muito curta. Use pelo menos 6 caracteres.';
+  if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail antes de entrar (veja sua caixa de entrada).';
+  if (/Unable to validate email address/i.test(m)) return 'E-mail inválido.';
+  if (/rate limit|too many/i.test(m)) return 'Muitas tentativas. Aguarde um minuto e tente de novo.';
+  return m;
+}
+
+/* ------------------------------------------------------------
+   Utilidades
+   ------------------------------------------------------------ */
+const money = n => 'R$ ' + Number(n || 0).toLocaleString('pt-BR');
+const starStr = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
+
+/* Imagem do produto: usa foto se houver, senão o emoji */
+function productThumb(p, cls) {
+  return p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="${cls || 'glyph'}">${p.glyph || '📦'}</span>`;
+}
+
+/* Tema escuro por padrão; alterna ao clicar */
+function wireTheme(btnId) {
+  const root = document.documentElement;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme') || 'dark';
+    root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  });
+}
+
+/* Atualiza o botão de conta no cabeçalho conforme o login (assíncrono) */
+async function renderAccountLink(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const label = el.querySelector('span');
+  if (!label) return;
+  try {
+    const s = await Store.session();
+    if (s && s.type === 'cliente') label.textContent = (s.name || '').split(' ')[0] || 'Conta';
+    else if (s && s.type === 'dono') label.textContent = 'Dono';
+    else label.textContent = 'Entrar';
+  } catch (e) { label.textContent = 'Entrar'; }
+}

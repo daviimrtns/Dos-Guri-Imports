@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Dos Guri Imports">
+  <defs>
+    <linearGradient id="dgGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FCEEAE"/>
+      <stop offset=".38" stop-color="#EBC96E"/>
+      <stop offset=".66" stop-color="#BE8E22"/>
+      <stop offset="1" stop-color="#89631A"/>
+    </linearGradient>
+  </defs>
+  <!-- Medalhao -->
+  <circle cx="100" cy="100" r="99" fill="#0C0A08"/>
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#dgGold)" stroke-width="4.5"/>
+  <circle cx="100" cy="100" r="83.5" fill="none" stroke="url(#dgGold)" stroke-width="1.2" opacity=".6"/>
+  <!-- Monograma DG -->
+  <text x="100" y="98" text-anchor="middle" fill="url(#dgGold)"
+        font-family="Didot,'Bodoni MT','Playfair Display',Garamond,'Times New Roman',serif"
+        font-size="70" font-weight="700">DG</text>
+  <!-- DOS GURI -->
+  <text x="100" y="132" text-anchor="middle" fill="#F4EFE6"
+        font-family="Didot,'Bodoni MT','Playfair Display',Garamond,'Times New Roman',serif"
+        font-size="19" letter-spacing="3">DOS GURI</text>
+  <!-- Divisor + IMPORTS -->
+  <line x1="60" y1="147" x2="80" y2="147" stroke="url(#dgGold)" stroke-width="1"/>
+  <line x1="120" y1="147" x2="140" y2="147" stroke="url(#dgGold)" stroke-width="1"/>
+  <rect x="56" y="145.4" width="3.2" height="3.2" fill="url(#dgGold)" transform="rotate(45 57.6 147)"/>
+  <rect x="140.8" y="145.4" width="3.2" height="3.2" fill="url(#dgGold)" transform="rotate(45 142.4 147)"/>
+  <text x="100" y="151" text-anchor="middle" fill="url(#dgGold)"
+        font-family="Didot,'Bodoni MT','Playfair Display',Garamond,'Times New Roman',serif"
+        font-size="10" letter-spacing="4.5">IMPORTS</text>
+</svg>

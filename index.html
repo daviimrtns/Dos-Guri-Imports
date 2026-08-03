@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dos Guri Imports — Importados originais com entrega própria</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Estilos específicos da home */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .hero-inner { max-width: var(--maxw); margin: 0 auto; padding: 84px 24px 92px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; }
+  .hero h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 6vw, 74px); line-height: 1.02; margin: 18px 0 20px; text-wrap: balance; letter-spacing: -0.01em; }
+  .hero h1 em { font-style: italic; color: var(--gold); }
+  .hero p { color: var(--ink-soft); font-size: 17px; max-width: 44ch; margin: 0 0 30px; }
+  .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-stats { display: flex; gap: 30px; margin-top: 42px; }
+  .hero-stats div { display: flex; flex-direction: column; }
+  .hero-stats b { font-family: var(--serif); font-size: 27px; }
+  .hero-stats span { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
+  .hero-art { aspect-ratio: 4/5; border-radius: 6px; border: 1px solid var(--line); background: radial-gradient(120% 90% at 70% 20%, color-mix(in srgb, var(--gold) 26%, transparent), transparent 55%), linear-gradient(160deg, var(--ground-2), var(--card)); position: relative; overflow: hidden; box-shadow: var(--shadow); }
+  .hero-art .glow { position: absolute; inset: -30% 20% auto -20%; height: 60%; background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 40%, transparent), transparent); filter: blur(30px); animation: drift 9s ease-in-out infinite alternate; }
+  @keyframes drift { to { transform: translate(40%, 30%); } }
+  .hero-art .big { position: absolute; font-size: 96px; line-height: 1; top: 50%; left: 50%; width: 72%; text-align: center; transform: translate(-50%,-50%); transition: opacity .45s ease, transform .45s ease; filter: drop-shadow(0 14px 30px rgba(0,0,0,.45)); }
+  .hero-art .big img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 18px; background: #fff; padding: 10px; box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+  /* Foto com fundo recortado: produto "flutuando", sem cartão branco */
+  .hero-art .big img.cutout { object-fit: contain; background: none; padding: 0; box-shadow: none; border-radius: 0; }
+  .hero-art .big.swap { opacity: 0; transform: translate(-50%,-42%); }
+  .hero-art .float { position: absolute; font-family: var(--serif); color: color-mix(in srgb, var(--gold) 60%, var(--ink)); }
+  .hero-badge { position: absolute; left: 22px; bottom: 22px; right: 22px; background: color-mix(in srgb, var(--ground) 78%, transparent); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
+  .hero-badge .k { font-family: var(--serif); font-size: 30px; color: var(--gold); }
+  .hero-badge .t { font-size: 13px; color: var(--ink-soft); }
+  .hero-badge .t b { color: var(--ink); font-weight: 600; display: block; }
+
+  section { padding: 72px 0; }
+  .sechead { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 34px; }
+  .sechead h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 3.5vw, 40px); margin: 8px 0 0; letter-spacing: -0.01em; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .cat { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 26px 18px; text-align: center; transition: .25s; }
+  .cat:hover { transform: translateY(-4px); border-color: var(--gold); }
+  .cat .ic { color: var(--gold); margin: 0 auto 14px; }
+  .cat b { display: block; font-size: 15px; font-weight: 600; }
+  .cat span { font-size: 11px; color: var(--ink-mute); letter-spacing: .04em; }
+
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
+  .chip { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; transition: .2s; }
+  .chip:hover { border-color: var(--gold); color: var(--ink); }
+  .chip.active { background: var(--gold); border-color: var(--gold); color: #14110F; font-weight: 600; }
+  .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  .trust { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ground-2); }
+  .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .trust .t { display: flex; gap: 14px; align-items: flex-start; }
+  .trust .ic { color: var(--gold); flex-shrink: 0; }
+  .trust b { display: block; font-size: 14px; }
+  .trust span { font-size: 12.5px; color: var(--ink-mute); }
+
+  .foot-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 34px; padding-bottom: 30px; }
+  .foot-grid h4 { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); margin: 0 0 14px; }
+  .foot-grid a { display: block; font-size: 13.5px; color: var(--ink-soft); padding: 5px 0; }
+  .foot-grid a:hover { color: var(--gold); }
+  .foot-grid .brand { font-family: var(--serif); font-size: 24px; }
+  .foot-grid .brand b { color: var(--gold); font-style: italic; font-weight: 400; }
+
+  @media (max-width: 980px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-art { max-width: 420px; }
+    .cat-grid { grid-template-columns: repeat(3, 1fr); }
+    .prod-grid { grid-template-columns: repeat(2, 1fr); }
+    .trust-grid { grid-template-columns: repeat(2, 1fr); }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    section { padding: 46px 0; }
+    .hero-inner { padding: 56px 20px 64px; }
+    .hero p { font-size: 16.5px; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .cat { padding: 30px 16px; }
+    .cat b { font-size: 16.5px; }
+    .cat span { font-size: 12.5px; }
+    .card .name { font-size: 16px; }
+    .price .now { font-size: 24px; }
+    .install { font-size: 13px; }
+    .card .glyph { font-size: 62px; }
+    .add { padding: 13px; font-size: 14.5px; }
+    .fav { width: 40px; height: 40px; }
+    .trust-grid { grid-template-columns: 1fr; gap: 18px; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-wrap: wrap; gap: 22px; }
+  }
+  @media (max-width: 380px) { .prod-grid, .cat-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">Parcele em até <b>12x sem juros</b> · Entrega feita pela própria loja · Produtos 100% originais</div>
+  <div class="navrow">
+    <a class="logo has-mark" href="index.html">
+      <img class="logo-mark" src="logo.png" alt="Dos Guri Imports" width="46" height="46">
+      <span class="logo-text">
+        <span class="brand">Dos Guri <b>Imports</b></span>
+        <span class="tag">Curadoria importada</span>
+      </span>
+    </a>
+    <nav class="main">
+      <a href="#cats">Categorias</a><a href="#ofertas">Novidades</a><a href="#ofertas">Ofertas</a>
+    </nav>
+    <label class="search" style="margin-left:auto">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar perfume, fone, bike…" aria-label="Buscar">
+    </label>
+    <div class="head-actions">
+      <a class="acct" id="acctLink" href="conta.html" title="Minha conta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span>Entrar</span>
+      </a>
+      <button class="theme-toggle" id="themeBtn" aria-label="Alternar tema" title="Alternar tema">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="iconbtn" id="cartBtn" aria-label="Carrinho">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" style="padding:0">
+  <div class="hero-inner">
+    <div>
+      <h1>O importado que você quer, <em>sem enrolação</em>.</h1>
+      <p>De perfumes franceses a bikes elétricas — selecionamos peças originais, com garantia e entrega feita pela própria loja.</p>
+      <div class="cta-row">
+        <a class="btn solid" href="#ofertas">Ver ofertas
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn" href="#cats">Explorar categorias</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="glow"></div>
+      <div class="float" style="top:14%;left:16%;font-size:64px;">✦</div>
+      <div class="float" style="top:44%;right:18%;font-size:40px;opacity:.7;">✧</div>
+      <div class="big" id="heroArt">🧴</div>
+    </div>
+  </div>
+</section>
+
+<section id="cats">
+  <div class="wrap">
+    <div class="sechead"><div><span class="eyebrow">Navegue por</span><h2>Categorias</h2></div></div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<section id="ofertas" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sechead"><div><span class="eyebrow">Selecionados pra você</span><h2>Nossos produtos</h2></div></div>
+    <div class="filters" id="filters"></div>
+    <div class="prod-grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="wrap"><div class="trust-grid">
+    <div class="t"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2 4 5v6c0 5 3.5 8 8 11 4.5-3 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg><div><b>100% Original</b><span>Garantia e nota fiscal em todos os pedidos.</span></div></div>
+    <div class="t"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="15" height="11" rx="2"/><path d="M16 9h4l3 3v5h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><div><b>Entrega própria</b><span>A gente mesmo leva seu pedido, com cuidado.</span></div></div>
+    <div class="t"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div><b>Pix e 12x sem juros</b><span>Pague como preferir, com total segurança.</span></div></div>
+    <div class="t"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 9 9M3 12a9 9 0 0 0 9 9M8 12l3 3 5-6"/></svg><div><b>Troca fácil</b><span>7 dias para trocar ou devolver sem dor de cabeça.</span></div></div>
+  </div></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <img src="logo.png" alt="Dos Guri Imports" width="66" height="66" style="display:block;margin-bottom:12px;border-radius:50%;">
+        <span class="brand">Dos Guri <b>Imports</b></span>
+        <p style="color:var(--ink-mute);font-size:13.5px;max-width:34ch;margin:12px 0 0;">Sua loja de importados de confiança. Curadoria, originalidade e entrega própria.</p>
+        <div class="pay" style="margin-top:14px"><span>PIX</span><span>VISA</span><span>MASTER</span><span>ELO</span><span>BOLETO</span></div>
+      </div>
+      <div><h4>Loja</h4><a href="#ofertas">Perfumes</a><a href="#ofertas">Fones</a><a href="#ofertas">Celulares</a><a href="#ofertas">Bikes</a></div>
+      <div><h4>Ajuda</h4><a href="#">Rastrear pedido</a><a href="#">Trocas e devoluções</a><a href="conta.html">Minha conta</a></div>
+      <div><h4>A loja</h4><a href="#">Sobre nós</a><a href="#">Instagram</a><a href="admin.html">Área do dono</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Dos Guri Imports · Curadoria de importados originais.</span>
+      <a href="admin.html" style="color:var(--ink-mute)">Painel do dono →</a>
+    </div>
+  </div>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="Carrinho">
+  <div class="drawer-head"><h3>Seu carrinho</h3><button id="closeCart" aria-label="Fechar">✕</button></div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot">
+    <div class="sumrow"><span>Subtotal</span><span id="subtotal">R$ 0</span></div>
+    <div class="sumrow"><span>Frete</span><span id="shipping">Combinar na entrega</span></div>
+    <div class="sumrow total"><span>Total</span><b id="total">R$ 0</b></div>
+    <button class="btn solid" id="checkoutBtn">Finalizar compra
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="toast" id="toast">Adicionado ao carrinho ✓</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data.js"></script>
+<script>
+  const grid = document.getElementById('grid');
+  let cart = Store.cart();
+  let curCat = 'todos';
+
+  // ---- Categorias ----
+  const CAT_ICONS = {
+    perfume:'<rect x="8" y="9" width="8" height="12" rx="1.5"/><path d="M10 9V6a2 2 0 0 1 4 0v3M10 4h4"/>',
+    mala:'<rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3M9 20v1M15 20v1"/>',
+    bike:'<circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17 10 8h5l2 4M10 8l4 9M9 5h3"/>',
+    celular:'<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
+    fone:'<path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="7" rx="1.5"/><rect x="17" y="13" width="4" height="7" rx="1.5"/>',
+  };
+  async function renderCats() {
+    const prods = await Store.products();
+    document.getElementById('catGrid').innerHTML = Object.entries(CATS).map(([key,label]) => {
+      const count = prods.filter(p => p.cat===key).length;
+      return `<a class="cat" href="#ofertas" data-cat="${key}">
+        <svg class="ic" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${CAT_ICONS[key]||''}</svg>
+        <b>${label}</b><span>${count} ${count===1?'item':'itens'}</span></a>`;
+    }).join('');
+    document.querySelectorAll('.cat').forEach(c => c.addEventListener('click', () => setCat(c.dataset.cat)));
+  }
+
+  // ---- Filtros ----
+  function renderFilters() {
+    const chips = [['todos','Todos'], ...Object.entries(CATS)];
+    document.getElementById('filters').innerHTML = chips.map(([k,l]) =>
+      `<button class="chip ${k===curCat?'active':''}" data-cat="${k}">${l}</button>`).join('');
+    document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => setCat(c.dataset.cat)));
+  }
+  function setCat(cat) {
+    curCat = cat;
+    renderFilters();
+    renderGrid();
+    document.getElementById('ofertas').scrollIntoView({ behavior:'smooth' });
+  }
+
+  // ---- Grade de produtos ----
+  async function renderGrid() {
+    const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
+    const all = await Store.products();
+    const list = all.filter(p =>
+      (curCat==='todos' || p.cat===curCat) &&
+      (!q || (p.name+' '+p.brand).toLowerCase().includes(q)));
+    if (list.length===0) { grid.innerHTML = '<p style="color:var(--ink-mute)">Nenhum produto encontrado.</p>'; return; }
+    grid.innerHTML = '';
+    list.forEach(p => {
+      const el = document.createElement('article');
+      el.className = 'card';
+      el.style.cursor = 'pointer';
+      el.innerHTML = `
+        <div class="media">
+          ${p.badge ? `<span class="badge">${p.badge}</span>` : (p.bestseller ? `<span class="tagsell">Mais vendido</span>` : '')}
+          <button class="fav" aria-label="Favoritar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+          ${productThumb(p,'glyph')}
+        </div>
+        <div class="body">
+          <span class="brandline">${p.brand}</span>
+          <span class="name">${p.name}</span>
+          <div class="stars"><span class="s">${starStr(p.rating)}</span> ${p.reviews}</div>
+          <div class="price"><span class="now">${money(p.price)}</span>${p.was?`<span class="was">${money(p.was)}</span>`:''}</div>
+          <div class="install">em 12x de <b>${money(Math.round(p.price/12))}</b> sem juros</div>
+          <div class="foot"><button class="add">Adicionar <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button></div>
+        </div>`;
+      el.querySelector('.fav').addEventListener('click', e => { e.stopPropagation(); e.currentTarget.classList.toggle('on'); });
+      el.querySelector('.add').addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+      el.addEventListener('click', () => { location.href = 'produto.html?id=' + p.id; });
+      grid.appendChild(el);
+    });
+  }
+  document.getElementById('searchInput').addEventListener('input', renderGrid);
+
+  // ---- Carrinho ----
+  const drawer = document.getElementById('drawer'), overlay = document.getElementById('overlay');
+  const openCart = () => { drawer.classList.add('open'); overlay.classList.add('open'); };
+  const closeCart = () => { drawer.classList.remove('open'); overlay.classList.remove('open'); };
+  document.getElementById('cartBtn').addEventListener('click', openCart);
+  document.getElementById('closeCart').addEventListener('click', closeCart);
+  overlay.addEventListener('click', closeCart);
+
+  let toastT;
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1800); }
+
+  function addToCart(p) {
+    const key = 'p' + p.id;
+    const found = cart.find(i => i.key===key);
+    if (found) found.qty++; else cart.push({ key, name:p.name, sub:p.brand, glyph:p.glyph, image:p.image, price:p.price, qty:1 });
+    Store.saveCart(cart); updateCart(); openCart();
+  }
+  function removeFromCart(key) { cart = cart.filter(i => i.key!==key); Store.saveCart(cart); updateCart(); }
+
+  function updateCart() {
+    const body = document.getElementById('cartBody');
+    document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+    if (cart.length===0) {
+      body.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Que tal um perfume novo? ✦</div>';
+    } else {
+      body.innerHTML = cart.map(i => `
+        <div class="citem">
+          <div class="th">${i.image?`<img src="${i.image}" alt="">`:(i.glyph||'📦')}</div>
+          <div>
+            <div class="cn">${i.name}</div>
+            ${i.sub?`<div class="csub">${i.sub}</div>`:''}
+            <div class="cp">${money(i.price)} ${i.qty>1?`× ${i.qty}`:''}</div>
+          </div>
+          <button class="rm" data-key="${i.key}">Remover</button>
+        </div>`).join('');
+      body.querySelectorAll('.rm').forEach(b => b.addEventListener('click', () => removeFromCart(b.dataset.key)));
+    }
+    const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    document.getElementById('subtotal').textContent = money(subtotal);
+    document.getElementById('shipping').textContent = subtotal===0 ? '—' : 'Combinar na entrega';
+    document.getElementById('total').textContent = money(subtotal);
+  }
+
+  // ---- Finalizar ----
+  document.getElementById('checkoutBtn').addEventListener('click', async () => {
+    if (cart.length===0) { toast('Seu carrinho está vazio'); return; }
+    const s = await Store.session();
+    if (!s || s.type!=='cliente') { alert('Entre na sua conta para finalizar o pedido.'); location.href='conta.html?next=index.html'; return; }
+    const btn = document.getElementById('checkoutBtn');
+    btn.disabled = true;
+    try {
+      await Store.createOrder(
+        cart.map(i=>({name:i.name, sub:i.sub, price:i.price, qty:i.qty})),
+        cart.reduce((a,i)=>a+i.price*i.qty,0),
+        s);
+      cart = []; Store.saveCart(cart); updateCart(); closeCart();
+      toast('Pedido registrado! ✓');
+    } catch (err) {
+      toast('Não foi possível finalizar: ' + friendlyError(err));
+    } finally { btn.disabled = false; }
+  });
+
+  // ---- Init ----
+  wireTheme('themeBtn');
+  renderAccountLink('acctLink');
+  renderCats();
+  renderFilters();
+  renderGrid();
+  updateCart();
+</script>
+<script>
+  // Rodízio de produtos no banner, com REMOÇÃO AUTOMÁTICA do fundo claro.
+  // O navegador carrega a foto e apaga o fundo (recorte), deixando o produto "flutuando".
+  // Obs.: o recorte precisa rodar via servidor (Live Server / site publicado). Aberto
+  // direto como arquivo (file://), o navegador bloqueia por segurança e mostra a foto
+  // original dentro de um cartão branco (que também fica bonito).
+  (function(){
+    var el = document.getElementById('heroArt');
+    if (!el) return;
+    var itens = [
+      { img:'images/fone.jpg',    emoji:'🎧' },
+      { img:'images/celular.jpg', emoji:'📱' },
+      { img:'images/bike.jpg',    emoji:'🚲' },
+      { img:'images/perfume.jpg', emoji:'🧴' },
+      { img:'images/vinho.jpg',   emoji:'🍷' },
+    ];
+
+    // Remove o fundo claro por "flood fill" a partir das bordas.
+    function recortar(img){
+      try {
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        var imgData = ctx.getImageData(0, 0, c.width, c.height);
+        var d = imgData.data, w = c.width, h = c.height;
+        var r0 = d[0], g0 = d[1], b0 = d[2], tol = 50;
+        var visited = new Uint8Array(w * h);
+        var stack = new Int32Array(w * h); var sp = 0;
+        function push(x, y){ if (x>=0 && y>=0 && x<w && y<h){ var vi = y*w + x; if (!visited[vi]){ visited[vi]=1; stack[sp++]=vi; } } }
+        var x, y;
+        for (x=0; x<w; x++){ push(x,0); push(x,h-1); }
+        for (y=0; y<h; y++){ push(0,y); push(w-1,y); }
+        while (sp > 0){
+          var vi = stack[--sp], i = vi*4;
+          if (Math.abs(d[i]-r0)<tol && Math.abs(d[i+1]-g0)<tol && Math.abs(d[i+2]-b0)<tol){
+            d[i+3] = 0;
+            var px = vi % w, py = (vi / w) | 0;
+            push(px+1,py); push(px-1,py); push(px,py+1); push(px,py-1);
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        return c.toDataURL('image/png');
+      } catch (e) { return null; }
+    }
+
+    function show(it){
+      if (it.cut) el.innerHTML = '<img class="cutout" src="'+it.cut+'" alt="">';
+      else if (it.missing) el.textContent = it.emoji;
+      else el.innerHTML = '<img src="'+it.img+'" alt="">';
+    }
+
+    // Pré-carrega e recorta cada foto uma vez.
+    itens.forEach(function(it, k){
+      var im = new Image();
+      im.onload = function(){ it.cut = recortar(im); it.loaded = true; if (k === i) show(itens[i]); };
+      im.onerror = function(){ it.missing = true; it.loaded = true; if (k === i) show(itens[i]); };
+      im.src = it.img;
+    });
+
+    var i = 0;
+    show(itens[0]);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    setInterval(function(){
+      el.classList.add('swap');
+      setTimeout(function(){
+        i = (i + 1) % itens.length;
+        show(itens[i]);
+        el.classList.remove('swap');
+      }, 450);
+    }, 2600);
+  })();
+</script>
+</body>
+</html>

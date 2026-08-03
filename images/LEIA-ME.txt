@@ -1,0 +1,35 @@
+FOTOS DO BANNER (rodízio da página inicial)
+============================================
+
+Coloque as fotos nesta pasta com EXATAMENTE estes nomes:
+
+  relogio.jpg   -> foto de um relógio
+  mala.jpg      -> foto de uma mala
+  celular.jpg   -> foto de um celular
+  perfume.jpg   -> foto de um perfume
+  fone.jpg      -> foto de um fone de ouvido
+  bike.jpg      -> foto de uma bike elétrica
+  vinho.jpg     -> foto de um vinho (usada no carrossel de destaques)
+
+Assim que os arquivos estiverem aqui, o banner passa a mostrar as
+fotos alternando sozinho. Enquanto não houver foto, aparece um
+emoji no lugar (não quebra nada).
+
+DICAS
+-----
+- Use imagens quadradas (ex: 800x800) e leves (menos de ~500 KB).
+- Fundo neutro/claro fica ótimo no visual escuro do site.
+- Pode ser .jpg ou .png (se usar .png, troque a extensão no index.html).
+
+QUER MAIS PRODUTOS NO RODÍZIO?
+------------------------------
+No arquivo index.html, procure por "Rodízio de produtos no banner"
+e edite a lista "itens" — é só adicionar mais linhas com img + emoji.
+
+COMO CONSEGUIR AS FOTOS
+-----------------------
+- Gerar por IA: use um gerador de imagens (ex: Bing/Copilot, Gemini,
+  ChatGPT com imagens, Leonardo.ai) pedindo "foto de produto de um
+  relógio em fundo claro, estilo e-commerce".
+- Ou use bancos de imagem grátis: Unsplash, Pexels, Pixabay.
+- Ou tire fotos reais dos seus próprios produtos.
