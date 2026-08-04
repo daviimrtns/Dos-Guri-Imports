@@ -71,7 +71,7 @@
   .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
   .chip { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; transition: .2s; }
   .chip:hover { border-color: var(--gold); color: var(--ink); }
-  .chip.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 600; }
+  .chip.active { background: var(--gold); border-color: var(--gold); color: var(--ground); font-weight: 600; }
   .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
   .trust { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ground-2); }
@@ -269,6 +269,7 @@
     viagem:      { sub:'Malas & Acessórios',      img:'https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=1200' },
     moda:        { sub:'Roupas & Acessórios',     img:'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200' },
     mobilidade:  { sub:'Bikes & Patinetes',       img:'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200' },
+    ferramentas: { sub:'Oficina & Reparos',        img:'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=1200' },
   };
   async function renderCats() {
     const prods = await Store.products();
