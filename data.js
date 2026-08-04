@@ -84,9 +84,42 @@ function rowToOrder(r) {
     email: payload.buyer_email || '',
     name: payload.buyer_name || '',
     date: r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '',
+    createdAt: r.created_at || null,
     items: lines,
     total: Number(r.total) || 0,
+    status: r.status || 'novo',
   };
+}
+
+/* Etapas do pedido (para o acompanhamento). A ordem importa. */
+const ORDER_STATUS = [
+  { key: 'novo',       label: 'Pedido recebido' },
+  { key: 'separando',  label: 'Separando' },
+  { key: 'a_caminho',  label: 'A caminho' },
+  { key: 'entregue',   label: 'Entregue' },
+];
+function statusLabel(key) {
+  if (key === 'cancelado') return 'Cancelado';
+  const s = ORDER_STATUS.find(x => x.key === key);
+  return s ? s.label : 'Pedido recebido';
+}
+function statusIndex(key) {
+  const i = ORDER_STATUS.findIndex(x => x.key === key);
+  return i < 0 ? 0 : i;
+}
+/* Monta a "linha de progresso" do pedido (usada na conta do cliente). */
+function statusStepper(status) {
+  if (status === 'cancelado') return '<span style="font-size:13px;font-weight:600;color:var(--bad)">✕ Pedido cancelado</span>';
+  const cur = statusIndex(status);
+  return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+    ORDER_STATUS.map((s, idx) => {
+      const done = idx <= cur;
+      const dot = '<span style="display:inline-flex;align-items:center;gap:6px">' +
+        '<span style="width:11px;height:11px;border-radius:999px;background:' + (done ? 'var(--gold)' : 'var(--line)') + '"></span>' +
+        '<span style="font-size:12.5px;color:' + (done ? 'var(--ink)' : 'var(--ink-mute)') + '">' + s.label + '</span></span>';
+      const sep = idx < ORDER_STATUS.length - 1 ? '<span style="flex:0 0 16px;height:1px;background:var(--line)"></span>' : '';
+      return dot + sep;
+    }).join('') + '</div>';
 }
 
 /* ------------------------------------------------------------
@@ -168,6 +201,60 @@ const Store = {
     const payload = { buyer_name: buyer?.name || '', buyer_email: buyer?.email || user.email, lines: items };
     const { error } = await sb.from('orders').insert({ user_id: user.id, items: payload, total });
     if (error) throw error;
+  },
+  /* Dono muda o status do pedido (acompanhamento). */
+  async updateOrderStatus(id, status) {
+    const { error } = await sb.from('orders').update({ status }).eq('id', id);
+    if (error) throw error;
+  },
+
+  /* ---------- Avaliações ---------- */
+  async reviews(productId) {
+    const { data, error } = await sb.from('reviews').select('*')
+      .eq('product_id', productId).order('created_at', { ascending: false });
+    if (error) { console.error('Erro ao carregar avaliações:', error); return []; }
+    return data.map(r => ({
+      id: r.id, name: r.name || 'Cliente', rating: r.rating, comment: r.comment || '',
+      date: r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '',
+    }));
+  },
+  async addReview(productId, rating, comment) {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Entre na sua conta para avaliar.');
+    let name = user.email;
+    const { data: prof } = await sb.from('profiles').select('name').eq('id', user.id).maybeSingle();
+    if (prof && prof.name) name = prof.name;
+    const { error } = await sb.from('reviews').insert({ product_id: productId, user_id: user.id, name, rating, comment });
+    if (error) throw error;
+  },
+
+  /* ---------- Foto do produto (Storage) ---------- */
+  async uploadImage(file) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = 'prod-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    const { error } = await sb.storage.from('produtos').upload(path, file, { upsert: false, contentType: file.type });
+    if (error) throw error;
+    const { data } = sb.storage.from('produtos').getPublicUrl(path);
+    return data.publicUrl;
+  },
+
+  /* ---------- Resumo de vendas (painel do dono) ---------- */
+  async salesStats() {
+    const orders = await this.orders();
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    let pedidosHoje = 0, fatHoje = 0, fatTotal = 0;
+    const contagem = {};
+    orders.forEach(o => {
+      fatTotal += o.total;
+      if (o.date === hoje) { pedidosHoje++; fatHoje += o.total; }
+      (o.items || []).forEach(l => {
+        var nome = l.name || 'Produto';
+        contagem[nome] = (contagem[nome] || 0) + (l.qty || 1);
+      });
+    });
+    let top = null, topQtd = 0;
+    Object.keys(contagem).forEach(n => { if (contagem[n] > topQtd) { topQtd = contagem[n]; top = n; } });
+    return { totalPedidos: orders.length, pedidosHoje, fatHoje, fatTotal, topProduto: top, topQtd };
   },
 };
 

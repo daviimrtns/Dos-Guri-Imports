@@ -61,6 +61,50 @@
 
     <div class="demo-note"><span>✅</span><div><b>Ao vivo:</b> as mudanças são salvas no banco (Supabase) e passam a valer para <b>todos os visitantes</b> da loja na hora.</div></div>
 
+    <!-- ===== Painel de vendas ===== -->
+    <style>
+      .dash { margin-bottom: 34px; }
+      .dash-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+      .tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+      .tile .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+      .tile .v { font-family: var(--serif); font-size: 26px; margin-top: 6px; }
+      .tile .v.gold { color: var(--gold); }
+      .dash-cols { display: grid; grid-template-columns: 1.35fr .65fr; gap: 16px; margin-bottom: 16px; }
+      .dash-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+      .dash-card h3 { font-family: var(--serif); font-weight: 400; font-size: 18px; margin: 0 0 14px; }
+      .chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
+      .chart .bw { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+      .chart .bar { width: 100%; max-width: 42px; background: linear-gradient(var(--gold), color-mix(in srgb, var(--gold) 45%, transparent)); border-radius: 6px 6px 0 0; min-height: 3px; }
+      .chart .bl { font-size: 10px; color: var(--ink-mute); }
+      .chart .bv { font-size: 10px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+      .drow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+      .drow:last-child { border-bottom: none; }
+      .drow .q { font-weight: 700; color: var(--bad); }
+      .drow .who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .drow .meta { color: var(--ink-mute); font-size: 12px; white-space: nowrap; }
+      @media (max-width: 900px) { .dash-tiles { grid-template-columns: 1fr 1fr; } .dash-cols { grid-template-columns: 1fr; } }
+    </style>
+    <div class="dash">
+      <div class="dash-tiles" id="dashTiles"></div>
+      <div class="dash-cols">
+        <div class="dash-card">
+          <h3>Vendas dos últimos 7 dias</h3>
+          <div class="chart" id="salesChart"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Estoque baixo</h3>
+          <div id="lowStock"></div>
+        </div>
+      </div>
+      <div class="dash-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px">
+          <h3 style="margin:0">Clientes</h3>
+          <button class="btn sm" id="exportBtn">Exportar pedidos (CSV)</button>
+        </div>
+        <div id="crmBox"></div>
+      </div>
+    </div>
+
     <div class="admin-grid">
       <!-- Lista -->
       <div>
@@ -101,7 +145,12 @@
             <div style="flex:1"><label>Selo/Badge</label><input type="text" id="fBadge" placeholder="Ex: -30% (opcional)"></div>
             <div style="flex:1"><label>Emoji</label><input type="text" id="fGlyph" placeholder="🧴" maxlength="4"></div>
           </div>
-          <div class="field"><label>Foto (link da imagem)</label><input type="url" id="fImage" placeholder="https://... (opcional)"><span class="hint">Se vazio, usa o emoji. Cole o link de uma foto do produto.</span></div>
+          <div class="field"><label>Foto do produto</label>
+            <input type="file" id="fFile" accept="image/*" style="font-size:13px; color:var(--ink-soft)">
+            <span class="hint" id="fFileHint">Envie uma foto (vai para o Supabase Storage) — ou cole um link abaixo.</span>
+            <input type="url" id="fImage" placeholder="https://... (opcional)" style="margin-top:8px">
+            <div id="fImgPreview"></div>
+          </div>
           <div class="field row2">
             <div style="flex:1"><label>Nota (0–5)</label><input type="number" id="fRating" min="0" max="5" step="0.1" value="5"></div>
             <div style="flex:1"><label>Nº avaliações</label><input type="number" id="fReviews" min="0" value="0"></div>
@@ -163,8 +212,87 @@
   function showPanel() {
     document.getElementById('loginView').style.display='none';
     document.getElementById('panelView').style.display='';
-    renderList(); renderOrders();
+    renderList(); renderOrders(); renderDashboard();
   }
+
+  // ---- Painel de vendas ----
+  async function renderDashboard() {
+    const [orders, prods] = await Promise.all([Store.orders(), Store.products()]);
+
+    // Resumo (tiles)
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    let pedHoje = 0, fatHoje = 0, fatTotal = 0;
+    const contagem = {};
+    orders.forEach(o => {
+      fatTotal += o.total;
+      if (o.date === hoje) { pedHoje++; fatHoje += o.total; }
+      (o.items || []).forEach(l => { const n = l.name || 'Produto'; contagem[n] = (contagem[n] || 0) + (l.qty || 1); });
+    });
+    let top = '—', topQ = 0;
+    Object.keys(contagem).forEach(n => { if (contagem[n] > topQ) { topQ = contagem[n]; top = n; } });
+    document.getElementById('dashTiles').innerHTML =
+      tile('Pedidos hoje', pedHoje) +
+      tile('Faturamento hoje', money(fatHoje), true) +
+      tile('Faturamento total', money(fatTotal), true) +
+      tile('Mais vendido', top + (topQ ? ' (' + topQ + ')' : ''));
+
+    // Gráfico últimos 7 dias (faturamento por dia)
+    const dias = [];
+    for (let k = 6; k >= 0; k--) { const d = new Date(); d.setDate(d.getDate() - k); dias.push(d); }
+    const porDia = dias.map(d => {
+      const chave = d.toLocaleDateString('pt-BR');
+      const tot = orders.filter(o => o.date === chave).reduce((a, o) => a + o.total, 0);
+      return { rot: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''), val: tot };
+    });
+    const maxV = Math.max(1, ...porDia.map(x => x.val));
+    document.getElementById('salesChart').innerHTML = porDia.map(x =>
+      `<div class="bw"><div class="bv">${x.val ? (x.val >= 1000 ? (x.val/1000).toFixed(1) + 'k' : x.val) : ''}</div>
+        <div class="bar" style="height:${Math.round(x.val / maxV * 100)}%"></div>
+        <div class="bl">${x.rot}</div></div>`).join('');
+
+    // Estoque baixo (<= 3)
+    const baixo = prods.filter(p => (p.stock || 0) <= 3).sort((a, b) => a.stock - b.stock);
+    document.getElementById('lowStock').innerHTML = baixo.length
+      ? baixo.map(p => `<div class="drow"><span class="who">${p.name}</span><span class="q">${p.stock} un.</span></div>`).join('')
+      : '<div class="empty">Tudo com estoque ok 👍</div>';
+
+    // Clientes (mini CRM)
+    const cli = {};
+    orders.forEach(o => {
+      const e = o.email || o.name || 'cliente';
+      if (!cli[e]) cli[e] = { pedidos: 0, total: 0, ultimo: o.date };
+      cli[e].pedidos++; cli[e].total += o.total;
+    });
+    const lista = Object.entries(cli).sort((a, b) => b[1].total - a[1].total);
+    document.getElementById('crmBox').innerHTML = lista.length
+      ? lista.map(([e, c]) => `<div class="drow"><span class="who">${e}</span><span class="meta">${c.pedidos} pedido${c.pedidos>1?'s':''} · ${money(c.total)} · último ${c.ultimo}</span></div>`).join('')
+      : '<div class="empty">Nenhum cliente ainda.</div>';
+
+    // guarda para exportar
+    renderDashboard._orders = orders;
+  }
+  function tile(k, v, gold) {
+    return `<div class="tile"><div class="k">${k}</div><div class="v${gold ? ' gold' : ''}">${v}</div></div>`;
+  }
+
+  // Exportar pedidos em CSV
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const orders = renderDashboard._orders || [];
+    if (!orders.length) { toast('Nenhum pedido para exportar'); return; }
+    const linhas = [['Pedido', 'Data', 'Cliente', 'Status', 'Itens', 'Total']];
+    orders.forEach(o => {
+      const itens = (o.items || []).map(i => `${i.qty}x ${i.name}${i.sub ? ' (' + i.sub + ')' : ''}`).join(' | ');
+      linhas.push(['#' + String(o.id).slice(-6), o.date, o.email || o.name || '', statusLabel(o.status), itens, String(o.total).replace('.', ',')]);
+    });
+    const csv = linhas.map(l => l.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'pedidos-dos-guri.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('CSV baixado ✓');
+  });
 
   // ---- Lista de produtos ----
   async function renderList() {
@@ -200,7 +328,20 @@
         <div class="oh"><span>#${String(o.id).slice(-6)} · ${o.email||o.name||'cliente'}</span><span>${o.date}</span></div>
         <div class="oi">${o.items.map(i=>`${i.qty}× ${i.name}${i.sub?' ('+i.sub+')':''}`).join('<br>')}</div>
         <div class="ot">Total: ${money(o.total)}</div>
+        <div style="margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+          <span style="font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute)">Status</span>
+          <select class="ostatus" data-id="${o.id}" style="flex:1; min-width:150px; background:var(--ground); border:1px solid var(--line); border-radius:8px; color:var(--ink); padding:8px 10px; font-size:13.5px; font-family:inherit">
+            ${ORDER_STATUS.map(s=>`<option value="${s.key}" ${o.status===s.key?'selected':''}>${s.label}</option>`).join('')}
+            <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
+          </select>
+        </div>
       </div>`).join('');
+    box.querySelectorAll('.ostatus').forEach(sel => sel.addEventListener('change', async () => {
+      sel.disabled = true;
+      try { await Store.updateOrderStatus(sel.dataset.id, sel.value); toast('Status atualizado ✓'); }
+      catch (e) { alert('Não deu para atualizar: ' + friendlyError(e)); }
+      finally { sel.disabled = false; }
+    }));
   }
 
   // ---- Editor ----
@@ -209,9 +350,37 @@
     ['fId','fName','fBrand','fOrigin','fWas','fBadge','fGlyph','fImage','fOptLabel','fOptions','fDesc'].forEach(i=>F(i).value='');
     F('fCat').value='perfume'; F('fPrice').value=''; F('fRating').value='5'; F('fReviews').value='0'; F('fStock').value='1'; F('fBest').checked=false;
     F('editorTitle').textContent='Novo produto'; F('editMsg').innerHTML='';
+    F('fFile').value=''; document.getElementById('fFileHint').textContent='Envie uma foto (vai para o Supabase Storage) — ou cole um link abaixo.';
+    updateImgPreview();
   }
   document.getElementById('newBtn').addEventListener('click', () => { clearForm(); F('fName').focus(); });
   document.getElementById('cancelBtn').addEventListener('click', clearForm);
+
+  // ---- Foto: pré-visualização e upload ----
+  function updateImgPreview() {
+    const url = F('fImage').value.trim();
+    const box = document.getElementById('fImgPreview');
+    box.innerHTML = url
+      ? `<img src="${url}" alt="" style="margin-top:10px;width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--line)" onerror="this.style.display='none'">`
+      : '';
+  }
+  document.getElementById('fImage').addEventListener('input', updateImgPreview);
+  document.getElementById('fFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const hint = document.getElementById('fFileHint');
+    hint.textContent = 'Enviando foto…';
+    try {
+      const url = await Store.uploadImage(file);
+      F('fImage').value = url;
+      updateImgPreview();
+      hint.textContent = 'Foto enviada ✓ — clique em "Salvar produto".';
+      toast('Foto enviada ✓');
+    } catch (err) {
+      hint.textContent = 'Não deu para enviar. Confira se o bucket "produtos" existe e você é o dono.';
+      alert('Erro no upload: ' + friendlyError(err));
+    }
+  });
 
   async function edit(id) {
     const p = await Store.product(id); if(!p) return;
@@ -221,6 +390,7 @@
     F('fOptLabel').value=p.optLabel||''; F('fOptions').value=(p.options||[]).join(', '); F('fDesc').value=p.desc||'';
     F('fStock').value=p.stock??1; F('fBest').checked=!!p.bestseller;
     F('editorTitle').textContent='Editar: ' + p.name;
+    updateImgPreview();
     window.scrollTo({ top:0, behavior:'smooth' });
   }
 

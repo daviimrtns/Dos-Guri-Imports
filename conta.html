@@ -159,6 +159,7 @@
             <div class="oh"><span>Pedido #${String(o.id).slice(-6)}</span><span>${o.date}</span></div>
             <div class="oi">${o.items.map(i=>`${i.qty}× ${i.name}${i.sub?' ('+i.sub+')':''}`).join('<br>')}</div>
             <div class="ot">Total: ${money(o.total)}</div>
+            <div style="margin-top:14px">${statusStepper(o.status)}</div>
           </div>`).join('');
       }
     } else {

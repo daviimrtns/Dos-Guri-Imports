@@ -263,7 +263,7 @@
       el.style.cursor = 'pointer';
       el.innerHTML = `
         <div class="media">
-          ${p.badge ? `<span class="badge">${p.badge}</span>` : (p.bestseller ? `<span class="tagsell">Mais vendido</span>` : '')}
+          ${p.stock<=0 ? `<span class="tagsell" style="background:var(--bad);color:#fff">Esgotado</span>` : (p.badge ? `<span class="badge">${p.badge}</span>` : (p.bestseller ? `<span class="tagsell">Mais vendido</span>` : ''))}
           <button class="fav" aria-label="Favoritar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
           ${productThumb(p,'glyph')}
         </div>
@@ -273,7 +273,7 @@
           <div class="stars"><span class="s">${starStr(p.rating)}</span> ${p.reviews}</div>
           <div class="price"><span class="now">${money(p.price)}</span>${p.was?`<span class="was">${money(p.was)}</span>`:''}</div>
           <div class="install">em 12x de <b>${money(Math.round(p.price/12))}</b> sem juros</div>
-          <div class="foot"><button class="add">Adicionar <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button></div>
+          <div class="foot">${p.stock<=0 ? `<button class="add" disabled style="opacity:.45;cursor:not-allowed">Esgotado</button>` : `<button class="add">Adicionar <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>`}</div>
         </div>`;
       el.querySelector('.fav').addEventListener('click', e => { e.stopPropagation(); e.currentTarget.classList.toggle('on'); });
       el.querySelector('.add').addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
@@ -297,7 +297,7 @@
   function addToCart(p) {
     const key = 'p' + p.id;
     const found = cart.find(i => i.key===key);
-    if (found) found.qty++; else cart.push({ key, name:p.name, sub:p.brand, glyph:p.glyph, image:p.image, price:p.price, qty:1 });
+    if (found) found.qty++; else cart.push({ key, pid:p.id, name:p.name, sub:p.brand, glyph:p.glyph, image:p.image, price:p.price, qty:1 });
     Store.saveCart(cart); updateCart(); openCart();
   }
   function removeFromCart(key) { cart = cart.filter(i => i.key!==key); Store.saveCart(cart); updateCart(); }

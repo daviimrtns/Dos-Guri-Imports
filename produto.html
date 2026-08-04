@@ -291,18 +291,94 @@
       [['Marca',P.brand],['Origem',P.origin||'—'],['Categoria',CATS[P.cat]||'—'],
        (P.options&&P.options.length)?[P.optLabel||'Opções', P.options.join(' · ')]:null,
        ['Garantia','12 meses']].filter(Boolean).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('') + '</table>';
-    document.getElementById('panelRev').innerHTML =
-      `<div class="rev-sum"><div><div class="rev-big">${Number(P.rating).toFixed(1).replace('.', ',')}</div>
-        <div class="s">${starStr(P.rating)}</div><div class="cnt">${P.reviews} avaliações</div></div>
-        <p style="max-width:34ch;color:var(--ink-soft);font-size:14.5px;">A maioria dos clientes recomenda este produto pela <b style="color:var(--ink)">qualidade</b> e <b style="color:var(--ink)">originalidade</b>.</p></div>
-      <p style="color:var(--ink-mute);font-size:13.5px">As avaliações dos clientes aparecerão aqui.</p>`;
-    document.querySelector('[data-tab="rev"]').textContent = 'Avaliações (' + P.reviews + ')';
+    renderReviews();
 
     // relacionados
     const others = (await Store.products()).filter(p => String(p.id)!==String(P.id)).slice(0,4);
     document.getElementById('relGrid').innerHTML = others.map(o =>
       `<a class="rcard" href="produto.html?id=${o.id}"><div class="m">${o.image?`<img src="${o.image}" alt="">`:(o.glyph||'📦')}</div>
         <div class="b"><div class="bn">${o.brand}</div><div class="nm">${o.name}</div><div class="pr">${money(o.price)}</div></div></a>`).join('');
+
+    // estoque esgotado
+    if (P.stock <= 0) {
+      const ab = document.getElementById('addBtn');
+      ab.textContent = 'Esgotado'; ab.disabled = true; ab.style.opacity = '.5'; ab.style.cursor = 'not-allowed';
+      document.getElementById('buyNow').style.display = 'none';
+    }
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  async function renderReviews() {
+    const box = document.getElementById('panelRev');
+    box.innerHTML = '<p style="color:var(--ink-mute)">Carregando avaliações…</p>';
+    let list = [];
+    try { list = await Store.reviews(P.id); } catch (e) {}
+    let avg, count;
+    if (list.length) { count = list.length; avg = list.reduce((a, r) => a + r.rating, 0) / count; }
+    else { count = P.reviews || 0; avg = Number(P.rating) || 5; }
+    document.querySelector('[data-tab="rev"]').textContent = 'Avaliações (' + count + ')';
+
+    const summary = `<div class="rev-sum"><div><div class="rev-big">${avg.toFixed(1).replace('.', ',')}</div>
+        <div class="s">${starStr(avg)}</div><div class="cnt">${count} avaliaç${count === 1 ? 'ão' : 'ões'}</div></div>
+        <p style="max-width:34ch;color:var(--ink-soft);font-size:14.5px;">${list.length ? 'Veja o que quem comprou achou deste produto.' : 'Seja o primeiro a avaliar este produto.'}</p></div>`;
+
+    const items = list.map(r => `
+      <div style="padding:16px 0;border-top:1px solid var(--line)">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <div style="width:36px;height:36px;border-radius:999px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);font-family:var(--serif)">${escapeHtml((r.name || 'C')[0].toUpperCase())}</div>
+          <div><div style="font-size:14px;font-weight:600">${escapeHtml(r.name)}</div><div class="s" style="color:var(--gold);font-size:12px">${starStr(r.rating)}</div></div>
+          <div style="margin-left:auto;font-size:12px;color:var(--ink-mute)">${r.date}</div>
+        </div>
+        ${r.comment ? `<p style="color:var(--ink-soft);font-size:14.5px;margin:0">${escapeHtml(r.comment)}</p>` : ''}
+      </div>`).join('');
+
+    box.innerHTML = summary + items + '<div id="reviewFormWrap"></div>';
+    renderReviewForm();
+  }
+
+  async function renderReviewForm() {
+    const wrap = document.getElementById('reviewFormWrap');
+    if (!wrap) return;
+    let s = null;
+    try { s = await Store.session(); } catch (e) {}
+    if (!s || s.type !== 'cliente') {
+      const back = encodeURIComponent('produto.html?id=' + P.id);
+      wrap.innerHTML = `<div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--line)">
+        <p style="color:var(--ink-mute);font-size:13.5px"><a href="conta.html?next=${back}" style="color:var(--gold)">Entre na sua conta</a> para avaliar este produto.</p></div>`;
+      return;
+    }
+    wrap.innerHTML = `<div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--line)">
+      <h3 style="font-family:var(--serif);font-weight:400;font-size:20px;margin:0 0 12px">Deixe sua avaliação</h3>
+      <div id="starPick" style="display:flex;gap:6px;font-size:28px;margin-bottom:12px"></div>
+      <textarea id="revComment" placeholder="Conte o que achou (opcional)" style="width:100%;background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:inherit;font-size:15px;min-height:80px;resize:vertical"></textarea>
+      <div id="revMsg"></div>
+      <button class="btn solid" id="sendReview" style="margin-top:12px">Enviar avaliação</button>
+    </div>`;
+    let picked = 5;
+    const sp = document.getElementById('starPick');
+    function paintStars() {
+      sp.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const st = document.createElement('span');
+        st.textContent = '★'; st.style.cursor = 'pointer';
+        st.style.color = i <= picked ? 'var(--gold)' : 'var(--line)';
+        st.addEventListener('click', () => { picked = i; paintStars(); });
+        sp.appendChild(st);
+      }
+    }
+    paintStars();
+    document.getElementById('sendReview').addEventListener('click', async () => {
+      const btn = document.getElementById('sendReview'); btn.disabled = true;
+      try {
+        await Store.addReview(P.id, picked, document.getElementById('revComment').value.trim());
+        toast('Avaliação enviada ✓');
+        renderReviews();
+      } catch (e) {
+        document.getElementById('revMsg').innerHTML = '<div class="form-msg err" style="margin-top:10px">' + friendlyError(e) + '</div>';
+        btn.disabled = false;
+      }
+    });
   }
 
   // quantidade
@@ -331,9 +407,10 @@
 
   function addToCart(open) {
     if (!P) return;
+    if (P.stock <= 0) { toast('Produto esgotado'); return; }
     const key = 'p' + P.id + (curOpt ? '-' + curOpt : '');
     const found = cart.find(i => i.key===key);
-    if (found) found.qty += qty; else cart.push({ key, name:P.name, sub:curOpt||P.brand, glyph:P.glyph, image:P.image, price:P.price, qty });
+    if (found) found.qty += qty; else cart.push({ key, pid:P.id, name:P.name, sub:curOpt||P.brand, glyph:P.glyph, image:P.image, price:P.price, qty });
     Store.saveCart(cart); updateCart();
     toast(qty + (qty>1?' itens adicionados':' item adicionado') + ' ✓');
     if (open) openCart();
