@@ -3,7 +3,7 @@
    Tema escuro é o padrão; o claro entra via data-theme="light".
    ============================================================ */
 :root {
-  --ground: #A81420; --ground-2: #8E0F1A; --card: #8A0E18;
+  --ground: #A81420; --ground-2: #8E0F1A; --card: #2B1016;
   --ink: #FFFFFF; --ink-soft: #F5CFD2; --ink-mute: #E1A7AC;
   --line: #C0353E; --gold: #FFFFFF; --gold-bright: #FFE1E3;
   --sale: #D98C5F; --good: #7FA37A; --bad: #D96A5F;
@@ -13,7 +13,7 @@
   --maxw: 1240px;
 }
 :root[data-theme="dark"] {
-  --ground: #A81420; --ground-2: #8E0F1A; --card: #8A0E18;
+  --ground: #A81420; --ground-2: #8E0F1A; --card: #2B1016;
   --ink: #FFFFFF; --ink-soft: #F5CFD2; --ink-mute: #E1A7AC;
   --line: #C0353E; --gold: #FFFFFF; --gold-bright: #FFE1E3;
   --shadow: 0 24px 60px -28px rgba(0,0,0,.75);
