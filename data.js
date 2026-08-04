@@ -17,7 +17,7 @@ const CATS = {
   cosmeticos:  'Cosméticos e Beleza',
   eletronicos: 'Eletrônicos',
   audio:       'Áudio',
-  bebidas:     'Bebidas Importadas',
+  bebidas:     'Bebidas',
   viagem:      'Viagem',
   moda:        'Moda e Acessórios',
   mobilidade:  'Mobilidade',
