@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobre nós — Dos Guri Imports</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .about-hero { text-align: center; padding: 20px 0 6px; }
+  .about-hero img { width: 84px; height: 84px; border-radius: 50%; display: block; margin: 0 auto 16px; box-shadow: var(--shadow); }
+  .about-body { max-width: 66ch; margin: 0 auto; }
+  .about-body p { color: var(--ink-soft); font-size: 16px; line-height: 1.75; margin: 0 0 18px; }
+  .about-body p b { color: var(--ink); }
+  .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 40px 0 10px; }
+  .value { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px 22px; }
+  .value .ic { color: var(--gold); margin-bottom: 12px; }
+  .value b { display: block; font-family: var(--serif); font-weight: 400; font-size: 20px; margin-bottom: 6px; }
+  .value span { font-size: 14px; color: var(--ink-mute); line-height: 1.6; }
+  .about-cta { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 40px 0 10px; }
+  @media (max-width: 780px) { .values { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">Parcele em até <b>12x sem juros</b> · Entrega feita pela própria loja · Produtos 100% originais</div>
+  <div class="navrow">
+    <a class="logo has-mark" href="index.html">
+      <img class="logo-mark" src="logo.png" alt="Dos Guri Imports" width="46" height="46">
+      <span class="logo-text">
+        <span class="brand">Dos Guri <b>Imports</b></span>
+      </span>
+    </a>
+    <nav class="main">
+      <a href="index.html#cats">Categorias</a><a href="index.html#ofertas">Novidades</a><a href="index.html#ofertas">Ofertas</a>
+    </nav>
+    <div class="head-actions" style="margin-left:auto">
+      <a class="acct" href="conta.html" title="Minha conta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span>Entrar</span>
+      </a>
+      <a class="iconbtn" href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener" aria-label="Instagram da loja" title="Siga no Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <button class="theme-toggle" id="themeBtn" aria-label="Alternar tema" title="Alternar tema">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="about-hero">
+    <img src="logo.png" alt="Dos Guri Imports">
+    <span class="eyebrow">Nossa história</span>
+    <h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,46px);margin:8px 0 0;letter-spacing:-.01em">Sobre nós</h1>
+  </div>
+
+  <div class="about-body" style="margin-top:30px">
+    <p>A <b>Dos Guri Imports</b> nasceu de uma ideia simples: trazer para Santa Catarina produtos importados de verdade — originais, de qualidade e com um preço que cabe no bolso.</p>
+
+    <p>Cada item do nosso catálogo passa por uma <b>curadoria cuidadosa</b>. Selecionamos perfumes, fones, celulares, bikes e acessórios pensando em uma coisa: entregar para você exatamente aquilo que a gente compraria para a própria casa. Nada de réplica, nada de pegadinha — só produto original, com procedência.</p>
+
+    <p>O nosso maior orgulho é o atendimento próximo. Aqui você não fala com um robô: fala com gente que conhece o que vende e que faz questão de acompanhar sua compra do clique até a sua porta. A <b>entrega é feita pela própria loja</b>, com o carinho de quem quer te ver voltando.</p>
+
+    <p>Mais do que uma loja de importados, a gente quer ser a sua loja de confiança. Seja bem-vindo à família Dos Guri. 🧡</p>
+  </div>
+
+  <div class="values">
+    <div class="value">
+      <svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/></svg>
+      <b>100% originais</b>
+      <span>Todos os produtos são autênticos e com procedência. Sem réplicas, sem surpresas.</span>
+    </div>
+    <div class="value">
+      <svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h11l4 5v4h-2"/><path d="M3 7v9h2"/><circle cx="7.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>
+      <b>Entrega própria</b>
+      <span>A gente cuida da sua encomenda do início ao fim, com acompanhamento de perto.</span>
+    </div>
+    <div class="value">
+      <svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <b>Atendimento humano</b>
+      <span>Fale com quem entende do assunto e faz questão de te ajudar em cada passo.</span>
+    </div>
+  </div>
+
+  <div class="about-cta">
+    <a class="btn solid" href="index.html">Ver a loja</a>
+    <a class="btn" href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener">Seguir no Instagram</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <img src="logo.png" alt="Dos Guri Imports" width="66" height="66" style="display:block;margin-bottom:12px;border-radius:50%;">
+        <span class="brand">Dos Guri <b>Imports</b></span>
+        <p style="color:var(--ink-mute);font-size:13.5px;max-width:34ch;margin:12px 0 0;">Sua loja de importados de confiança. Curadoria, originalidade e entrega própria.</p>
+        <div class="pay" style="margin-top:14px"><span>PIX</span><span>VISA</span><span>MASTER</span><span>ELO</span><span>BOLETO</span></div>
+      </div>
+      <div><h4>Loja</h4><a href="index.html#ofertas">Perfumes</a><a href="index.html#ofertas">Fones</a><a href="index.html#ofertas">Celulares</a><a href="index.html#ofertas">Bikes</a></div>
+      <div><h4>Ajuda</h4><a href="#">Rastrear pedido</a><a href="#">Trocas e devoluções</a><a href="conta.html">Minha conta</a></div>
+      <div><h4>A loja</h4><a href="sobre.html">Sobre nós</a><a href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener">Instagram</a><a href="admin.html">Área do dono</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Dos Guri Imports · Curadoria de importados originais.</span>
+      <a class="iconbtn" href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener" aria-label="Instagram" title="Siga no Instagram" style="color:var(--ink-soft)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="admin.html" style="color:var(--ink-mute)">Painel do dono →</a>
+    </div>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script>wireTheme('themeBtn');</script>
+</body>
+</html>
