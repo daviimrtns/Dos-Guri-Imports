@@ -130,11 +130,13 @@
           </div>
           <div class="field"><label>Categoria</label>
             <select id="fCat">
-              <option value="perfume">Perfumes</option>
-              <option value="fone">Fones</option>
-              <option value="celular">Celulares</option>
-              <option value="bike">Bikes elétricas</option>
-              <option value="mala">Malas</option>
+              <option value="cosmeticos">Cosméticos e Beleza</option>
+              <option value="eletronicos">Eletrônicos</option>
+              <option value="audio">Áudio</option>
+              <option value="bebidas">Bebidas Importadas</option>
+              <option value="viagem">Viagem</option>
+              <option value="moda">Moda e Acessórios</option>
+              <option value="mobilidade">Mobilidade</option>
             </select>
           </div>
           <div class="field row2">
@@ -348,7 +350,7 @@
   const F = id => document.getElementById(id);
   function clearForm() {
     ['fId','fName','fBrand','fOrigin','fWas','fBadge','fGlyph','fImage','fOptLabel','fOptions','fDesc'].forEach(i=>F(i).value='');
-    F('fCat').value='perfume'; F('fPrice').value=''; F('fRating').value='5'; F('fReviews').value='0'; F('fStock').value='1'; F('fBest').checked=false;
+    F('fCat').value='cosmeticos'; F('fPrice').value=''; F('fRating').value='5'; F('fReviews').value='0'; F('fStock').value='1'; F('fBest').checked=false;
     F('editorTitle').textContent='Novo produto'; F('editMsg').innerHTML='';
     F('fFile').value=''; document.getElementById('fFileHint').textContent='Envie uma foto (vai para o Supabase Storage) — ou cole um link abaixo.';
     updateImgPreview();
@@ -385,7 +387,7 @@
   async function edit(id) {
     const p = await Store.product(id); if(!p) return;
     F('fId').value=p.id; F('fName').value=p.name||''; F('fBrand').value=p.brand||''; F('fOrigin').value=p.origin||'';
-    F('fCat').value=p.cat||'perfume'; F('fPrice').value=p.price||''; F('fWas').value=p.was||''; F('fBadge').value=p.badge||'';
+    F('fCat').value=p.cat||'cosmeticos'; F('fPrice').value=p.price||''; F('fWas').value=p.was||''; F('fBadge').value=p.badge||'';
     F('fGlyph').value=p.glyph||''; F('fImage').value=p.image||''; F('fRating').value=p.rating??5; F('fReviews').value=p.reviews??0;
     F('fOptLabel').value=p.optLabel||''; F('fOptions').value=(p.options||[]).join(', '); F('fDesc').value=p.desc||'';
     F('fStock').value=p.stock??1; F('fBest').checked=!!p.bestseller;

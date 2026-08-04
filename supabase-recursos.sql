@@ -57,9 +57,13 @@ create policy "avaliacoes: logado cria a sua"
   on public.reviews for insert with check (auth.uid() = user_id);
 
 -- 4) FOTOS DOS PRODUTOS (Supabase Storage) -------------------
--- IMPORTANTE: antes de rodar esta parte, crie o bucket no painel:
---   Storage > New bucket >  Nome: produtos  |  Public bucket: SIM
--- Depois rode as políticas abaixo:
+-- Cria o bucket "produtos" (público) direto por SQL — não precisa
+-- mexer no painel. Se já existir, só garante que fica público.
+insert into storage.buckets (id, name, public)
+values ('produtos', 'produtos', true)
+on conflict (id) do update set public = true;
+
+-- Políticas de acesso ao bucket:
 drop policy if exists "produtos storage: leitura publica" on storage.objects;
 create policy "produtos storage: leitura publica"
   on storage.objects for select using (bucket_id = 'produtos');
