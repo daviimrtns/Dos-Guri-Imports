@@ -261,6 +261,10 @@ const Store = {
   },
 };
 
+/* Expõe no window para que o carrossel do hero (script type="module") consiga
+   acessar. Scripts de módulo não enxergam const/let do escopo clássico. */
+window.Store = Store;
+
 /* Traduz mensagens de erro comuns do Supabase para português. */
 function friendlyError(err) {
   const m = (err && err.message) ? err.message : String(err || 'Erro desconhecido');
@@ -277,6 +281,7 @@ function friendlyError(err) {
    Utilidades
    ------------------------------------------------------------ */
 const money = n => 'R$ ' + Number(n || 0).toLocaleString('pt-BR');
+window.money = money; // usado também pelo carrossel do hero (script de módulo)
 const starStr = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
 
 /* Imagem do produto: usa foto se houver, senão o emoji */

@@ -20,14 +20,6 @@
   .hero-stats b { font-family: var(--serif); font-size: 27px; }
   .hero-stats span { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); }
   .hero-art { aspect-ratio: 4/5; border-radius: 6px; border: 1px solid var(--line); background: radial-gradient(120% 90% at 70% 20%, color-mix(in srgb, var(--gold) 26%, transparent), transparent 55%), linear-gradient(160deg, var(--ground-2), var(--card)); position: relative; overflow: hidden; box-shadow: var(--shadow); }
-  .hero-art .glow { position: absolute; inset: -30% 20% auto -20%; height: 60%; background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 40%, transparent), transparent); filter: blur(30px); animation: drift 9s ease-in-out infinite alternate; }
-  @keyframes drift { to { transform: translate(40%, 30%); } }
-  .hero-art .big { position: absolute; font-size: 96px; line-height: 1; top: 50%; left: 50%; width: 72%; text-align: center; transform: translate(-50%,-50%); transition: opacity .45s ease, transform .45s ease; filter: drop-shadow(0 14px 30px rgba(0,0,0,.45)); }
-  .hero-art .big img { display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 18px; background: #fff; padding: 10px; box-shadow: 0 18px 40px rgba(0,0,0,.45); }
-  /* Foto com fundo recortado: produto "flutuando", sem cartão branco */
-  .hero-art .big img.cutout { object-fit: contain; background: none; padding: 0; box-shadow: none; border-radius: 0; }
-  .hero-art .big.swap { opacity: 0; transform: translate(-50%,-42%); }
-  .hero-art .float { position: absolute; font-family: var(--serif); color: color-mix(in srgb, var(--gold) 60%, var(--ink)); }
   .hero-badge { position: absolute; left: 22px; bottom: 22px; right: 22px; background: color-mix(in srgb, var(--ground) 78%, transparent); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
   .hero-badge .k { font-family: var(--serif); font-size: 30px; color: var(--gold); }
   .hero-badge .t { font-size: 13px; color: var(--ink-soft); }
@@ -73,6 +65,18 @@
   .chip:hover { border-color: var(--gold); color: var(--ink); }
   .chip.active { background: var(--gold); border-color: var(--gold); color: var(--ground); font-weight: 600; }
   .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  /* Prateleiras horizontais (estilo marketplace) */
+  .shelf { margin-bottom: 40px; }
+  .shelf-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .shelf-head h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 3vw, 32px); margin: 0; letter-spacing: -.01em; }
+  .shelf-tag { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; background: var(--gold); color: var(--ground); padding: 4px 10px; border-radius: 999px; }
+  .shelf-row { display: flex; gap: 18px; overflow-x: auto; padding: 4px 2px 14px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+  .shelf-row::-webkit-scrollbar { height: 8px; }
+  .shelf-row::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+  .shelf-row::-webkit-scrollbar-track { background: transparent; }
+  .shelf-row > .card { flex: 0 0 230px; scroll-snap-align: start; }
+  @media (max-width: 560px) { .shelf-row > .card { flex-basis: 74%; } }
 
   .trust { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--ground-2); }
   .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
@@ -166,12 +170,8 @@
         <a class="btn" href="#cats">Explorar categorias</a>
       </div>
     </div>
-    <div class="hero-art" aria-hidden="true">
-      <div class="glow"></div>
-      <div class="float" style="top:14%;left:16%;font-size:64px;">✦</div>
-      <div class="float" style="top:44%;right:18%;font-size:40px;opacity:.7;">✧</div>
-      <div class="big" id="heroArt">🧴</div>
-    </div>
+    <!-- Carrossel de produtos (ilha React + embla-carousel-react) -->
+    <div class="hero-art" id="heroCarousel"></div>
   </div>
 </section>
 
@@ -183,6 +183,23 @@
       <p>Produtos importados selecionados com qualidade premium e entrega garantida.</p>
     </div>
     <div class="bento-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<section id="shelves" style="padding: 24px 0 0">
+  <div class="wrap">
+    <div class="shelf" id="shelf-vendidos">
+      <div class="shelf-head"><h2>Mais vendidos</h2></div>
+      <div class="shelf-row" id="row-vendidos"></div>
+    </div>
+    <div class="shelf" id="shelf-ofertas">
+      <div class="shelf-head"><h2>Ofertas do dia</h2><span class="shelf-tag">Descontos</span></div>
+      <div class="shelf-row" id="row-ofertas"></div>
+    </div>
+    <div class="shelf" id="shelf-novidades">
+      <div class="shelf-head"><h2>Novidades</h2></div>
+      <div class="shelf-row" id="row-novidades"></div>
+    </div>
   </div>
 </section>
 
@@ -317,11 +334,15 @@
       (!q || (p.name+' '+p.brand).toLowerCase().includes(q)));
     if (list.length===0) { grid.innerHTML = '<p style="color:var(--ink-mute)">Nenhum produto encontrado.</p>'; return; }
     grid.innerHTML = '';
-    list.forEach(p => {
-      const el = document.createElement('article');
-      el.className = 'card';
-      el.style.cursor = 'pointer';
-      el.innerHTML = `
+    list.forEach(p => grid.appendChild(makeCard(p)));
+  }
+
+  // Molde de card reutilizável (usado na grade e nas prateleiras)
+  function makeCard(p) {
+    const el = document.createElement('article');
+    el.className = 'card';
+    el.style.cursor = 'pointer';
+    el.innerHTML = `
         <div class="media">
           ${p.stock<=0 ? `<span class="tagsell" style="background:var(--bad);color:#fff">Esgotado</span>` : (p.badge ? `<span class="badge">${p.badge}</span>` : (p.bestseller ? `<span class="tagsell">Mais vendido</span>` : ''))}
           <button class="fav" aria-label="Favoritar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
@@ -335,11 +356,25 @@
           <div class="install">em 12x de <b>${money(Math.round(p.price/12))}</b> sem juros</div>
           <div class="foot">${p.stock<=0 ? `<button class="add" disabled style="opacity:.45;cursor:not-allowed">Esgotado</button>` : `<button class="add">Adicionar <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>`}</div>
         </div>`;
-      el.querySelector('.fav').addEventListener('click', e => { e.stopPropagation(); e.currentTarget.classList.toggle('on'); });
-      el.querySelector('.add').addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
-      el.addEventListener('click', () => { location.href = 'produto.html?id=' + p.id; });
-      grid.appendChild(el);
-    });
+    el.querySelector('.fav').addEventListener('click', e => { e.stopPropagation(); e.currentTarget.classList.toggle('on'); });
+    const add = el.querySelector('.add'); if (add && !add.disabled) add.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    el.addEventListener('click', () => { location.href = 'produto.html?id=' + p.id; });
+    return el;
+  }
+
+  // Prateleiras horizontais (Mais vendidos / Ofertas / Novidades)
+  async function renderShelves() {
+    const all = await Store.products();
+    const fill = (rowId, shelfId, items) => {
+      const shelf = document.getElementById(shelfId), row = document.getElementById(rowId);
+      if (!shelf || !row) return;
+      if (!items.length) { shelf.style.display = 'none'; return; }
+      shelf.style.display = ''; row.innerHTML = '';
+      items.forEach(p => row.appendChild(makeCard(p)));
+    };
+    fill('row-vendidos', 'shelf-vendidos', all.filter(p => p.bestseller));
+    fill('row-ofertas', 'shelf-ofertas', all.filter(p => p.was && Number(p.was) > Number(p.price)));
+    fill('row-novidades', 'shelf-novidades', all.slice().sort((a, b) => b.id - a.id).slice(0, 10));
   }
   document.getElementById('searchInput').addEventListener('input', renderGrid);
 
@@ -411,99 +446,10 @@
   renderCats();
   renderFilters();
   renderGrid();
+  renderShelves();
   updateCart();
 </script>
-<script>
-  // Rodízio de produtos no banner, com REMOÇÃO AUTOMÁTICA do fundo claro.
-  // O navegador carrega a foto e apaga o fundo (recorte), deixando o produto "flutuando".
-  // Obs.: o recorte precisa rodar via servidor (Live Server / site publicado). Aberto
-  // direto como arquivo (file://), o navegador bloqueia por segurança e mostra a foto
-  // original dentro de um cartão branco (que também fica bonito).
-  (function(){
-    var el = document.getElementById('heroArt');
-    if (!el) return;
-    var itens = [
-      { img:'images/fone.jpg',    emoji:'🎧' },
-      { img:'images/celular.jpg', emoji:'📱' },
-      { img:'images/bike.jpg',    emoji:'🚲' },
-      { img:'images/perfume.jpg', emoji:'🧴' },
-      { img:'images/vinho.jpg',   emoji:'🍷' },
-    ];
-
-    // Remove o fundo claro por "flood fill" a partir das bordas.
-    function recortar(img){
-      try {
-        var c = document.createElement('canvas');
-        c.width = img.naturalWidth; c.height = img.naturalHeight;
-        var ctx = c.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        var imgData = ctx.getImageData(0, 0, c.width, c.height);
-        var d = imgData.data, w = c.width, h = c.height;
-        // 1) Passada GLOBAL: remove branco/cinza muito claro em qualquer lugar,
-        //    inclusive nos vãos fechados (dentro das rodas da bike, alça do fone).
-        var i, mx, mn;
-        for (i = 0; i < d.length; i += 4){
-          mx = Math.max(d[i], d[i+1], d[i+2]); mn = Math.min(d[i], d[i+1], d[i+2]);
-          if (mx > 200 && (mx - mn) < 42) d[i+3] = 0;
-        }
-        // 2) Preenchimento a partir das bordas p/ pegar o cinza do degradê (mais escuro).
-        var visited = new Uint8Array(w * h);
-        var stack = new Int32Array(w * h); var sp = 0;
-        function push(x, y){ if (x>=0 && y>=0 && x<w && y<h){ var vi = y*w + x; if (!visited[vi]){ visited[vi]=1; stack[sp++]=vi; } } }
-        function ehFundo(k){ var a=Math.max(d[k],d[k+1],d[k+2]); return d[k+3]===0 || (a>168 && (a-Math.min(d[k],d[k+1],d[k+2]))<54); }
-        var x, y;
-        for (x=0; x<w; x++){ push(x,0); push(x,h-1); }
-        for (y=0; y<h; y++){ push(0,y); push(w-1,y); }
-        while (sp > 0){
-          var vi = stack[--sp], ii = vi*4;
-          if (ehFundo(ii)){
-            d[ii+3] = 0;
-            var px = vi % w, py = (vi / w) | 0;
-            push(px+1,py); push(px-1,py); push(px,py+1); push(px,py-1);
-          }
-        }
-        // 3) Suaviza o halo claro fininho que sobrou grudado no recorte.
-        for (var q = 0; q < w*h; q++){
-          var j = q*4;
-          if (d[j+3] === 0) continue;
-          var jm = Math.max(d[j],d[j+1],d[j+2]), jn = Math.min(d[j],d[j+1],d[j+2]);
-          if (jm>205 && (jm-jn)<40){
-            var qx=q%w, qy=(q/w)|0;
-            if ((qx>0 && d[(q-1)*4+3]===0) || (qx<w-1 && d[(q+1)*4+3]===0) ||
-                (qy>0 && d[(q-w)*4+3]===0) || (qy<h-1 && d[(q+w)*4+3]===0)) d[j+3] = 70;
-          }
-        }
-        ctx.putImageData(imgData, 0, 0);
-        return c.toDataURL('image/png');
-      } catch (e) { return null; }
-    }
-
-    function show(it){
-      if (it.cut) el.innerHTML = '<img class="cutout" src="'+it.cut+'" alt="">';
-      else if (it.missing) el.textContent = it.emoji;
-      else el.innerHTML = '<img src="'+it.img+'" alt="">';
-    }
-
-    // Pré-carrega e recorta cada foto uma vez.
-    itens.forEach(function(it, k){
-      var im = new Image();
-      im.onload = function(){ it.cut = recortar(im); it.loaded = true; if (k === i) show(itens[i]); };
-      im.onerror = function(){ it.missing = true; it.loaded = true; if (k === i) show(itens[i]); };
-      im.src = it.img;
-    });
-
-    var i = 0;
-    show(itens[0]);
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    setInterval(function(){
-      el.classList.add('swap');
-      setTimeout(function(){
-        i = (i + 1) % itens.length;
-        show(itens[i]);
-        el.classList.remove('swap');
-      }, 450);
-    }, 2600);
-  })();
-</script>
+<!-- Carrossel de produtos do hero (ilha React compilada com Vite) -->
+<script type="module" src="dist/hero.js"></script>
 </body>
 </html>

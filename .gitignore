@@ -1,0 +1,4 @@
+node_modules/
+
+# dist/ é commitado de propósito: o Live Server serve dist/hero.js pronto,
+# sem passo de build no deploy.

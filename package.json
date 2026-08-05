@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "build:hero": "vite build",
+    "watch:hero": "vite build --watch"
+  },
+  "dependencies": {
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "lucide-react": "^1.28.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^30.0.1",
+    "puppeteer-core": "^25.5.0",
+    "vite": "^7.3.6"
+  },
+  "comment:overrides": "O binário nativo do Rollup é bloqueado pela Application Control do Windows. Usamos a build em WASM (sem .node nativo) para o vite build funcionar aqui.",
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@4.62.4"
+  }
+}
