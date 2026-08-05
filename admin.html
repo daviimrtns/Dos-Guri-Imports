@@ -69,7 +69,40 @@
   .st-entregue   { color: #6ecb8a; background: color-mix(in srgb, #6ecb8a 16%, transparent); }
   .st-cancelado  { color: #e06a6a; background: color-mix(in srgb, #e06a6a 16%, transparent); }
 
-  .ordfilters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  /* Filtros de pedidos (chips) */
+  .ordfilters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .chip { appearance: none; font-family: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .01em;
+    color: var(--ink-soft); background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 8px 7px 14px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;
+    transition: color .18s, border-color .18s, background .18s, transform .08s; }
+  .chip:hover { color: var(--ink); border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
+  .chip:active { transform: translateY(1px); }
+  .chip.active { background: var(--gold); border-color: var(--gold); color: var(--ground); }
+  .chip .chip-n { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;
+    padding: 3px 7px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink-mute); }
+  .chip.active .chip-n { background: color-mix(in srgb, var(--ground) 22%, transparent); color: var(--ground); }
+
+  /* Cartão de pedido */
+  #tab-orders .order { transition: border-color .18s ease, box-shadow .18s ease; }
+  #tab-orders .order:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); box-shadow: var(--shadow); }
+  #tab-orders .order .oh { align-items: center; }
+  #tab-orders .order .oh span:first-child { color: var(--ink); font-weight: 600; font-size: 13.5px; }
+
+  /* Linha "mudar status" */
+  .statusrow { margin-top: 14px; padding-top: 13px; border-top: 1px dashed var(--line);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .statusrow .lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+  select.ostatus { flex: 1; min-width: 160px; appearance: none; -webkit-appearance: none;
+    background-color: var(--ground); border: 1px solid var(--line); border-radius: 9px; color: var(--ink);
+    padding: 9px 34px 9px 12px; font-size: 13.5px; font-family: inherit; cursor: pointer;
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23F5CFD2' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    transition: border-color .18s, box-shadow .18s; }
+  select.ostatus:hover { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
+  select.ostatus:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent); }
+  select.ostatus:disabled { opacity: .55; cursor: wait; }
+  :root[data-theme="light"] select.ostatus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234A423A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
 
   @media (max-width: 900px) { .dash-tiles { grid-template-columns: 1fr 1fr; } .dash-cols { grid-template-columns: 1fr; } }
 </style>
@@ -446,7 +479,7 @@
     const filtros = [['todos','Todos'], ...ORDER_STATUS.map(s=>[s.key, s.label]), ['cancelado','Cancelado']];
     document.getElementById('ordFilters').innerHTML = filtros.map(([k,l]) => {
       const n = k==='todos' ? orders.length : orders.filter(o => (o.status||'novo')===k).length;
-      return `<button class="chip ${k===curOrdFilter?'active':''}" data-of="${k}">${l} (${n})</button>`;
+      return `<button class="chip ${k===curOrdFilter?'active':''}" data-of="${k}">${l}<span class="chip-n">${n}</span></button>`;
     }).join('');
     document.querySelectorAll('[data-of]').forEach(c => c.addEventListener('click', () => { curOrdFilter = c.dataset.of; renderOrders(); }));
 
@@ -461,9 +494,9 @@
         <div style="margin:6px 0 10px"><span class="stbadge st-${o.status||'novo'}" data-badge="${o.id}">${statusLabel(o.status)}</span></div>
         <div class="oi">${o.items.map(i=>`${i.qty}× ${i.name}${i.sub?' ('+i.sub+')':''}`).join('<br>')}</div>
         <div class="ot">Total: ${money(o.total)}</div>
-        <div style="margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap">
-          <span style="font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute)">Mudar status</span>
-          <select class="ostatus" data-id="${o.id}" style="flex:1; min-width:150px; background:var(--ground); border:1px solid var(--line); border-radius:8px; color:var(--ink); padding:8px 10px; font-size:13.5px; font-family:inherit">
+        <div class="statusrow">
+          <span class="lbl">Mudar status</span>
+          <select class="ostatus" data-id="${o.id}">
             ${ORDER_STATUS.map(s=>`<option value="${s.key}" ${o.status===s.key?'selected':''}>${s.label}</option>`).join('')}
             <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
           </select>
