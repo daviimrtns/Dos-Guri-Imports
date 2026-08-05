@@ -144,6 +144,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
         <span>Entrar</span>
       </a>
+      <a class="acct owner-only" href="admin.html" title="Painel do dono" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Painel</span>
+      </a>
       <a class="iconbtn" href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener" aria-label="Instagram da loja" title="Siga no Instagram">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg>
       </a>
@@ -231,14 +235,14 @@
       </div>
       <div><h4>Loja</h4><a href="#ofertas">Perfumes</a><a href="#ofertas">Fones</a><a href="#ofertas">Celulares</a><a href="#ofertas">Bikes</a></div>
       <div><h4>Ajuda</h4><a href="#">Rastrear pedido</a><a href="#">Trocas e devoluções</a><a href="conta.html">Minha conta</a></div>
-      <div><h4>A loja</h4><a href="sobre.html">Sobre nós</a><a href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener">Instagram</a><a href="admin.html">Área do dono</a></div>
+      <div><h4>A loja</h4><a href="sobre.html">Sobre nós</a><a href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener">Instagram</a><a class="owner-only" href="admin.html" style="display:none">Área do dono</a></div>
     </div>
     <div class="foot-bottom">
       <span>© 2026 Dos Guri Imports · Curadoria de importados originais.</span>
       <a class="iconbtn" href="https://www.instagram.com/dosguriimportssc" target="_blank" rel="noopener" aria-label="Instagram" title="Siga no Instagram" style="color:var(--ink-soft)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.2" fill="currentColor" stroke="none"/></svg>
       </a>
-      <a href="admin.html" style="color:var(--ink-mute)">Painel do dono →</a>
+      <a class="owner-only" href="admin.html" style="color:var(--ink-mute);display:none">Painel do dono →</a>
     </div>
   </div>
 </footer>
@@ -376,6 +380,8 @@
     fill('row-ofertas', 'shelf-ofertas', all.filter(p => p.was && Number(p.was) > Number(p.price)));
     fill('row-novidades', 'shelf-novidades', all.slice().sort((a, b) => b.id - a.id).slice(0, 10));
   }
+  // Busca: filtra a grade "Nossos produtos" (a prévia ao vivo abaixo do campo
+  // é ligada por wireSearchPreview no init).
   document.getElementById('searchInput').addEventListener('input', renderGrid);
 
   // ---- Carrinho ----
@@ -443,6 +449,8 @@
   // ---- Init ----
   wireTheme('themeBtn');
   renderAccountLink('acctLink');
+  applyOwnerMode();
+  wireSearchPreview('searchInput');
   renderCats();
   renderFilters();
   renderGrid();

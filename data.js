@@ -289,6 +289,63 @@ function productThumb(p, cls) {
   return p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span class="${cls || 'glyph'}">${p.glyph || '📦'}</span>`;
 }
 
+/* Prévia de busca ao vivo: mostra um painel flutuante logo abaixo do campo,
+   com os produtos que combinam com o que está sendo digitado — sem precisar
+   rolar a página. Clicar num item abre a página do produto.
+   Uso: wireSearchPreview('searchInput'). */
+function wireSearchPreview(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  const panel = document.createElement('div');
+  panel.className = 'search-preview';
+  panel.style.display = 'none';
+  document.body.appendChild(panel);
+
+  const hide = () => { panel.style.display = 'none'; };
+  const place = () => {
+    const r = input.getBoundingClientRect();
+    panel.style.left = Math.round(r.left) + 'px';
+    panel.style.top = Math.round(r.bottom + 8) + 'px';
+    panel.style.width = Math.round(Math.max(r.width, 300)) + 'px';
+  };
+
+  let token = 0;
+  async function update() {
+    const q = (input.value || '').toLowerCase().trim();
+    if (!q) { hide(); return; }
+    const my = ++token;
+    let prods = [];
+    try { prods = await Store.products(); } catch (e) { prods = []; }
+    if (my !== token) return; // ignora respostas antigas
+    const matches = prods
+      .filter(p => (p.name + ' ' + (p.brand || '')).toLowerCase().includes(q))
+      .slice(0, 6);
+    if (!matches.length) {
+      panel.innerHTML = '<div class="sp-empty">Nenhum produto encontrado.</div>';
+    } else {
+      panel.innerHTML = matches.map(p => `
+        <a class="sp-item" href="produto.html?id=${p.id}">
+          <span class="sp-thumb">${p.image ? `<img src="${p.image}" alt="">` : (p.glyph || '📦')}</span>
+          <span class="sp-info">
+            <span class="sp-name">${p.name}</span>
+            ${p.brand ? `<span class="sp-brand">${p.brand}</span>` : ''}
+          </span>
+          <span class="sp-price">${money(p.price)}</span>
+        </a>`).join('');
+    }
+    place();
+    panel.style.display = '';
+  }
+
+  input.addEventListener('input', update);
+  input.addEventListener('focus', () => { if (input.value.trim()) update(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+  document.addEventListener('click', e => { if (e.target !== input && !panel.contains(e.target)) hide(); });
+  window.addEventListener('scroll', () => { if (panel.style.display !== 'none') place(); }, { passive: true });
+  window.addEventListener('resize', () => { if (panel.style.display !== 'none') place(); });
+}
+
 /* Tema escuro por padrão; alterna ao clicar */
 function wireTheme(btnId) {
   const root = document.documentElement;
@@ -311,4 +368,20 @@ async function renderAccountLink(id) {
     else if (s && s.type === 'dono') label.textContent = 'Dono';
     else label.textContent = 'Entrar';
   } catch (e) { label.textContent = 'Entrar'; }
+}
+
+/* Ajusta a interface para o perfil do dono, se ele estiver logado:
+   - adiciona a classe "owner-mode" no <body> (o CSS esconde carrinho e botões
+     de compra — o dono gerencia a loja, não compra);
+   - revela os atalhos exclusivos do dono (class="owner-only", escondidos por
+     padrão com style="display:none"), como o botão "Painel" no topo.
+   Visitantes e clientes não são afetados. */
+async function applyOwnerMode() {
+  try {
+    const s = await Store.session();
+    if (s && s.type === 'dono') {
+      document.body.classList.add('owner-mode');
+      document.querySelectorAll('.owner-only').forEach(el => { el.style.display = ''; });
+    }
+  } catch (e) { /* em caso de erro, mantém a interface padrão (comprador) */ }
 }

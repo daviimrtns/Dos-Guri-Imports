@@ -201,3 +201,38 @@ footer { padding: 46px 0 34px; border-top: 1px solid rgba(255,255,255,.08); marg
   .field.row2 { flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ------------------------------------------------------------
+   Modo dono (body.owner-mode): o dono gerencia a loja, não compra.
+   Esconde o carrinho do topo e todos os botões de "Adicionar/Comprar".
+   A classe é adicionada por applyOwnerMode() em data.js quando o
+   perfil logado é "dono".
+   ------------------------------------------------------------ */
+.owner-mode #cartBtn,
+.owner-mode .card .add,
+.owner-mode #addBtn,
+.owner-mode #buyNow,
+.owner-mode .buyer-only { display: none !important; }
+
+/* ------------------------------------------------------------
+   Prévia de busca (painel flutuante sob o campo de busca).
+   Posição/largura são definidas via JS (wireSearchPreview em data.js).
+   ------------------------------------------------------------ */
+.search-preview { position: fixed; z-index: 300; background: var(--card);
+  border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+  padding: 6px; max-height: 66vh; overflow-y: auto; }
+.search-preview .sp-item { display: flex; align-items: center; gap: 12px;
+  padding: 8px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+.search-preview .sp-item:hover { background: var(--ground-2); }
+.search-preview .sp-thumb { width: 46px; height: 46px; flex: 0 0 46px;
+  display: grid; place-items: center; background: #fff; border-radius: 8px;
+  overflow: hidden; font-size: 22px; }
+.search-preview .sp-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.search-preview .sp-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+.search-preview .sp-name { font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-preview .sp-brand { font-size: 12px; color: var(--ink-mute); }
+.search-preview .sp-price { font-family: var(--serif); font-size: 15px;
+  color: var(--gold); white-space: nowrap; }
+.search-preview .sp-empty { padding: 16px; color: var(--ink-mute);
+  font-size: 14px; text-align: center; }
