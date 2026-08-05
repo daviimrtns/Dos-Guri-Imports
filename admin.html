@@ -4,7 +4,75 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Painel do dono — Dos Guri Imports</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo.png">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* ===== Painel do dono — visual e interações ===== */
+  /* Abas */
+  .tabs { display: flex; gap: 4px; margin: 20px 0 24px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--ink-mute);
+    font-size: 14px; font-weight: 600; font-family: inherit; padding: 12px 16px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 9px; transition: color .2s, border-color .2s; }
+  .tab svg { width: 17px; height: 17px; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab .badge-count { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold);
+    border-radius: 999px; font-size: 11px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
+  .tabpane { animation: paneIn .28s ease; }
+  @keyframes paneIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* KPIs */
+  .dash { margin-bottom: 8px; }
+  .dash-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+  .tile { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; overflow: hidden; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+  .tile:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: var(--shadow); }
+  .tile .ic { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 10px;
+    display: grid; place-items: center; background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--gold); }
+  .tile .ic svg { width: 18px; height: 18px; }
+  .tile .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+  .tile .v { font-family: var(--price); font-weight: 700; font-variant-numeric: tabular-nums;
+    font-size: 26px; margin-top: 8px; letter-spacing: -.02em; line-height: 1.1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .v.gold { color: var(--gold); }
+
+  .dash-cols { display: grid; grid-template-columns: 1.35fr .65fr; gap: 16px; margin-bottom: 16px; }
+  .dash-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .dash-card h3 { font-family: var(--serif); font-weight: 400; font-size: 18px; margin: 0 0 14px; }
+
+  /* Gráfico */
+  .chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; }
+  .chart .bw { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%;
+    justify-content: flex-end; cursor: default; }
+  .chart .bar { width: 100%; max-width: 42px; border-radius: 7px 7px 0 0; min-height: 3px; height: 0;
+    background: linear-gradient(var(--gold), color-mix(in srgb, var(--gold) 40%, transparent));
+    transition: height .7s cubic-bezier(.2,.8,.2,1), filter .2s ease; }
+  .chart .bw:hover .bar { filter: brightness(1.25) saturate(1.1); }
+  .chart .bl { font-size: 10px; color: var(--ink-mute); text-transform: capitalize; }
+  .chart .bv { font-size: 10px; color: var(--ink-soft); font-variant-numeric: tabular-nums; min-height: 12px; }
+
+  .drow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .drow:last-child { border-bottom: none; }
+  .drow .q { font-weight: 700; color: var(--bad); font-variant-numeric: tabular-nums; }
+  .drow .who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drow .meta { color: var(--ink-mute); font-size: 12px; white-space: nowrap; }
+
+  /* Status dos pedidos */
+  .stbadge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+    padding: 4px 11px; border-radius: 999px; letter-spacing: .01em; }
+  .stbadge::before { content: ''; width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
+  .st-novo       { color: #6aa3ff; background: color-mix(in srgb, #6aa3ff 16%, transparent); }
+  .st-separando  { color: #e0a24a; background: color-mix(in srgb, #e0a24a 16%, transparent); }
+  .st-a_caminho  { color: #b98bff; background: color-mix(in srgb, #b98bff 16%, transparent); }
+  .st-entregue   { color: #6ecb8a; background: color-mix(in srgb, #6ecb8a 16%, transparent); }
+  .st-cancelado  { color: #e06a6a; background: color-mix(in srgb, #e06a6a 16%, transparent); }
+
+  .ordfilters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+  @media (max-width: 900px) { .dash-tiles { grid-template-columns: 1fr 1fr; } .dash-cols { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 
@@ -50,7 +118,7 @@
     <div class="admin-bar">
       <div class="page-head" style="margin:0">
         <span class="eyebrow">Acesso total</span>
-        <h1 style="margin:4px 0">Gerenciar produtos</h1>
+        <h1 style="margin:4px 0">Painel do dono</h1>
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap">
         <button class="btn sm" id="newBtn">+ Novo produto</button>
@@ -59,121 +127,127 @@
       </div>
     </div>
 
-    <div class="demo-note"><span>✅</span><div><b>Ao vivo:</b> as mudanças são salvas no banco (Supabase) e passam a valer para <b>todos os visitantes</b> da loja na hora.</div></div>
-
-    <!-- ===== Painel de vendas ===== -->
-    <style>
-      .dash { margin-bottom: 34px; }
-      .dash-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
-      .tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
-      .tile .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
-      .tile .v { font-family: var(--serif); font-size: 26px; margin-top: 6px; }
-      .tile .v.gold { color: var(--gold); }
-      .dash-cols { display: grid; grid-template-columns: 1.35fr .65fr; gap: 16px; margin-bottom: 16px; }
-      .dash-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
-      .dash-card h3 { font-family: var(--serif); font-weight: 400; font-size: 18px; margin: 0 0 14px; }
-      .chart { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
-      .chart .bw { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-      .chart .bar { width: 100%; max-width: 42px; background: linear-gradient(var(--gold), color-mix(in srgb, var(--gold) 45%, transparent)); border-radius: 6px 6px 0 0; min-height: 3px; }
-      .chart .bl { font-size: 10px; color: var(--ink-mute); }
-      .chart .bv { font-size: 10px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-      .drow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
-      .drow:last-child { border-bottom: none; }
-      .drow .q { font-weight: 700; color: var(--bad); }
-      .drow .who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .drow .meta { color: var(--ink-mute); font-size: 12px; white-space: nowrap; }
-      @media (max-width: 900px) { .dash-tiles { grid-template-columns: 1fr 1fr; } .dash-cols { grid-template-columns: 1fr; } }
-    </style>
-    <div class="dash">
-      <div class="dash-tiles" id="dashTiles"></div>
-      <div class="dash-cols">
-        <div class="dash-card">
-          <h3>Vendas dos últimos 7 dias</h3>
-          <div class="chart" id="salesChart"></div>
-        </div>
-        <div class="dash-card">
-          <h3>Estoque baixo</h3>
-          <div id="lowStock"></div>
-        </div>
-      </div>
-      <div class="dash-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px">
-          <h3 style="margin:0">Clientes</h3>
-          <button class="btn sm" id="exportBtn">Exportar pedidos (CSV)</button>
-        </div>
-        <div id="crmBox"></div>
-      </div>
+    <!-- Abas -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="overview" type="button" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Visão geral
+      </button>
+      <button class="tab" data-tab="products" type="button" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Produtos <span class="badge-count" id="tabProdCount">0</span>
+      </button>
+      <button class="tab" data-tab="orders" type="button" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        Pedidos <span class="badge-count" id="tabOrdCount">0</span>
+      </button>
     </div>
 
-    <div class="admin-grid">
-      <!-- Lista -->
-      <div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
-          <h3 style="font-family:var(--serif); font-weight:400; font-size:20px; margin:0">Produtos <span id="pCount" style="color:var(--ink-mute); font-size:14px"></span></h3>
+    <!-- ===== Aba: Visão geral ===== -->
+    <section class="tabpane" id="tab-overview">
+      <div class="demo-note"><span>✅</span><div><b>Ao vivo:</b> as mudanças são salvas no banco (Supabase) e passam a valer para <b>todos os visitantes</b> da loja na hora.</div></div>
+      <div class="dash">
+        <div class="dash-tiles" id="dashTiles"></div>
+        <div class="dash-cols">
+          <div class="dash-card">
+            <h3>Vendas dos últimos 7 dias</h3>
+            <div class="chart" id="salesChart"></div>
+          </div>
+          <div class="dash-card">
+            <h3>Estoque baixo</h3>
+            <div id="lowStock"></div>
+          </div>
         </div>
-        <div class="plist" id="plist"></div>
-
-        <h3 style="font-family:var(--serif); font-weight:400; font-size:20px; margin:34px 0 12px">Pedidos recebidos <span id="oCount" style="color:var(--ink-mute); font-size:14px"></span></h3>
-        <div id="ordersBox"></div>
+        <div class="dash-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px">
+            <h3 style="margin:0">Clientes</h3>
+            <button class="btn sm" id="exportBtn">Exportar pedidos (CSV)</button>
+          </div>
+          <div id="crmBox"></div>
+        </div>
       </div>
+    </section>
 
-      <!-- Editor -->
-      <div class="editor">
-        <h3 id="editorTitle">Novo produto</h3>
-        <div id="editMsg"></div>
-        <form id="prodForm">
-          <input type="hidden" id="fId">
-          <div class="field"><label>Nome do produto</label><input type="text" id="fName" required></div>
-          <div class="field row2">
-            <div style="flex:1"><label>Marca</label><input type="text" id="fBrand"></div>
-            <div style="flex:1"><label>Origem</label><input type="text" id="fOrigin" placeholder="Ex: França"></div>
+    <!-- ===== Aba: Produtos ===== -->
+    <section class="tabpane" id="tab-products" hidden>
+      <div class="admin-grid">
+        <!-- Lista -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+            <h3 style="font-family:var(--serif); font-weight:400; font-size:20px; margin:0">Produtos <span id="pCount" style="color:var(--ink-mute); font-size:14px"></span></h3>
+            <button class="btn sm" id="newBtn2">+ Novo</button>
           </div>
-          <div class="field"><label>Categoria</label>
-            <select id="fCat">
-              <option value="cosmeticos">Cosméticos e Beleza</option>
-              <option value="eletronicos">Eletrônicos</option>
-              <option value="audio">Áudio</option>
-              <option value="bebidas">Bebidas</option>
-              <option value="viagem">Viagem</option>
-              <option value="moda">Moda e Acessórios</option>
-              <option value="mobilidade">Mobilidade</option>
-              <option value="ferramentas">Ferramentas</option>
-            </select>
-          </div>
-          <div class="field row2">
-            <div style="flex:1"><label>Preço (R$)</label><input type="number" id="fPrice" min="0" step="0.01" required></div>
-            <div style="flex:1"><label>Preço antigo</label><input type="number" id="fWas" min="0" step="0.01" placeholder="opcional"></div>
-          </div>
-          <div class="field row2">
-            <div style="flex:1"><label>Selo/Badge</label><input type="text" id="fBadge" placeholder="Ex: -30% (opcional)"></div>
-            <div style="flex:1"><label>Emoji</label><input type="text" id="fGlyph" placeholder="🧴" maxlength="4"></div>
-          </div>
-          <div class="field"><label>Foto do produto</label>
-            <input type="file" id="fFile" accept="image/*" style="font-size:13px; color:var(--ink-soft)">
-            <span class="hint" id="fFileHint">Envie uma foto (vai para o Supabase Storage) — ou cole um link abaixo.</span>
-            <input type="url" id="fImage" placeholder="https://... (opcional)" style="margin-top:8px">
-            <div id="fImgPreview"></div>
-          </div>
-          <div class="field row2">
-            <div style="flex:1"><label>Nota (0–5)</label><input type="number" id="fRating" min="0" max="5" step="0.1" value="5"></div>
-            <div style="flex:1"><label>Nº avaliações</label><input type="number" id="fReviews" min="0" value="0"></div>
-          </div>
-          <div class="field row2">
-            <div style="flex:1"><label>Rótulo das opções</label><input type="text" id="fOptLabel" placeholder="Ex: Tamanho, Cor"></div>
-            <div style="flex:1"><label>Estoque</label><input type="number" id="fStock" min="0" value="1"></div>
-          </div>
-          <div class="field"><label>Opções (separadas por vírgula)</label><input type="text" id="fOptions" placeholder="Ex: 50 ml, 100 ml, 150 ml"><span class="hint">Deixe vazio se não tiver variações.</span></div>
-          <div class="field"><label>Descrição</label><textarea id="fDesc" placeholder="Descrição do produto..."></textarea></div>
-          <label style="display:flex; align-items:center; gap:9px; font-size:14px; color:var(--ink-soft); margin-bottom:18px; cursor:pointer">
-            <input type="checkbox" id="fBest" style="width:auto"> Marcar como "Mais vendido"
-          </label>
-          <div style="display:flex; gap:10px">
-            <button class="btn solid block" type="submit">Salvar produto</button>
-            <button class="btn" type="button" id="cancelBtn">Limpar</button>
-          </div>
-        </form>
+          <div class="plist" id="plist"></div>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor">
+          <h3 id="editorTitle">Novo produto</h3>
+          <div id="editMsg"></div>
+          <form id="prodForm">
+            <input type="hidden" id="fId">
+            <div class="field"><label>Nome do produto</label><input type="text" id="fName" required></div>
+            <div class="field row2">
+              <div style="flex:1"><label>Marca</label><input type="text" id="fBrand"></div>
+              <div style="flex:1"><label>Origem</label><input type="text" id="fOrigin" placeholder="Ex: França"></div>
+            </div>
+            <div class="field"><label>Categoria</label>
+              <select id="fCat">
+                <option value="cosmeticos">Cosméticos e Beleza</option>
+                <option value="eletronicos">Eletrônicos</option>
+                <option value="audio">Áudio</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="viagem">Viagem</option>
+                <option value="moda">Moda e Acessórios</option>
+                <option value="mobilidade">Mobilidade</option>
+                <option value="ferramentas">Ferramentas</option>
+              </select>
+            </div>
+            <div class="field row2">
+              <div style="flex:1"><label>Preço (R$)</label><input type="number" id="fPrice" min="0" step="0.01" required></div>
+              <div style="flex:1"><label>Preço antigo</label><input type="number" id="fWas" min="0" step="0.01" placeholder="opcional"></div>
+            </div>
+            <div class="field row2">
+              <div style="flex:1"><label>Selo/Badge</label><input type="text" id="fBadge" placeholder="Ex: -30% (opcional)"></div>
+              <div style="flex:1"><label>Emoji</label><input type="text" id="fGlyph" placeholder="🧴" maxlength="4"></div>
+            </div>
+            <div class="field"><label>Foto do produto</label>
+              <input type="file" id="fFile" accept="image/*" style="font-size:13px; color:var(--ink-soft)">
+              <span class="hint" id="fFileHint">Envie uma foto (vai para o Supabase Storage) — ou cole um link abaixo.</span>
+              <input type="url" id="fImage" placeholder="https://... (opcional)" style="margin-top:8px">
+              <div id="fImgPreview"></div>
+            </div>
+            <div class="field row2">
+              <div style="flex:1"><label>Nota (0–5)</label><input type="number" id="fRating" min="0" max="5" step="0.1" value="5"></div>
+              <div style="flex:1"><label>Nº avaliações</label><input type="number" id="fReviews" min="0" value="0"></div>
+            </div>
+            <div class="field row2">
+              <div style="flex:1"><label>Rótulo das opções</label><input type="text" id="fOptLabel" placeholder="Ex: Tamanho, Cor"></div>
+              <div style="flex:1"><label>Estoque</label><input type="number" id="fStock" min="0" value="1"></div>
+            </div>
+            <div class="field"><label>Opções (separadas por vírgula)</label><input type="text" id="fOptions" placeholder="Ex: 50 ml, 100 ml, 150 ml"><span class="hint">Deixe vazio se não tiver variações.</span></div>
+            <div class="field"><label>Descrição</label><textarea id="fDesc" placeholder="Descrição do produto..."></textarea></div>
+            <label style="display:flex; align-items:center; gap:9px; font-size:14px; color:var(--ink-soft); margin-bottom:18px; cursor:pointer">
+              <input type="checkbox" id="fBest" style="width:auto"> Marcar como "Mais vendido"
+            </label>
+            <div style="display:flex; gap:10px">
+              <button class="btn solid block" type="submit">Salvar produto</button>
+              <button class="btn" type="button" id="cancelBtn">Limpar</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- ===== Aba: Pedidos ===== -->
+    <section class="tabpane" id="tab-orders" hidden>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px">
+        <h3 style="font-family:var(--serif); font-weight:400; font-size:20px; margin:0">Pedidos recebidos <span id="oCount" style="color:var(--ink-mute); font-size:14px"></span></h3>
+        <button class="btn sm" id="exportBtn2">Exportar (CSV)</button>
+      </div>
+      <div class="ordfilters" id="ordFilters"></div>
+      <div id="ordersBox"></div>
+    </section>
   </div>
 </div>
 
@@ -184,6 +258,13 @@
 <script>
   let toastT;
   function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1600); }
+
+  // ---- Abas ----
+  function setTab(name){
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.tabpane').forEach(p => { p.hidden = (p.id !== 'tab-' + name); });
+  }
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setTab(t.dataset.tab)));
 
   // ---- Login do dono ----
   document.getElementById('formAdmin').addEventListener('submit', async e => {
@@ -215,7 +296,34 @@
   function showPanel() {
     document.getElementById('loginView').style.display='none';
     document.getElementById('panelView').style.display='';
+    setTab('overview');
     renderList(); renderOrders(); renderDashboard();
+  }
+
+  // ---- Animações ----
+  function easeOut(p){ return 1 - Math.pow(1 - p, 3); }
+  function countUp(el, to, fmt){
+    const dur = 700, t0 = performance.now();
+    const show = n => el.textContent = (fmt === 'money' ? money(Math.round(n)) : String(Math.round(n)));
+    function step(t){ const p = Math.min(1, (t - t0) / dur); show(to * easeOut(p)); if (p < 1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+
+  // Ícones dos KPIs
+  const KPI_IC = {
+    bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+    cash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>',
+    trend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 7-7"/><path d="M17 8h4v4"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6L12 17.8 6.6 19.6l1-6L3.3 9.4l6-.9z"/></svg>',
+  };
+  function tile(k, opts){
+    const gold = opts.gold ? ' gold' : '';
+    const anim = opts.fmt ? ` data-count="${opts.raw}" data-fmt="${opts.fmt}"` : '';
+    return `<div class="tile">
+      <span class="ic">${KPI_IC[opts.icon] || ''}</span>
+      <div class="k">${k}</div>
+      <div class="v${gold}"${anim}>${opts.display}</div>
+    </div>`;
   }
 
   // ---- Painel de vendas ----
@@ -234,10 +342,12 @@
     let top = '—', topQ = 0;
     Object.keys(contagem).forEach(n => { if (contagem[n] > topQ) { topQ = contagem[n]; top = n; } });
     document.getElementById('dashTiles').innerHTML =
-      tile('Pedidos hoje', pedHoje) +
-      tile('Faturamento hoje', money(fatHoje), true) +
-      tile('Faturamento total', money(fatTotal), true) +
-      tile('Mais vendido', top + (topQ ? ' (' + topQ + ')' : ''));
+      tile('Pedidos hoje',       { icon:'bag',   raw: pedHoje,  fmt:'int',   display: pedHoje }) +
+      tile('Faturamento hoje',   { icon:'cash',  raw: fatHoje,  fmt:'money', display: money(fatHoje), gold:true }) +
+      tile('Faturamento total',  { icon:'trend', raw: fatTotal, fmt:'money', display: money(fatTotal), gold:true }) +
+      tile('Mais vendido',       { icon:'star',  display: top + (topQ ? ' (' + topQ + ')' : '') });
+    // anima os números
+    document.querySelectorAll('#dashTiles .v[data-count]').forEach(el => countUp(el, +el.dataset.count, el.dataset.fmt));
 
     // Gráfico últimos 7 dias (faturamento por dia)
     const dias = [];
@@ -245,13 +355,16 @@
     const porDia = dias.map(d => {
       const chave = d.toLocaleDateString('pt-BR');
       const tot = orders.filter(o => o.date === chave).reduce((a, o) => a + o.total, 0);
-      return { rot: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''), val: tot };
+      return { rot: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''), val: tot, dia: chave };
     });
     const maxV = Math.max(1, ...porDia.map(x => x.val));
     document.getElementById('salesChart').innerHTML = porDia.map(x =>
-      `<div class="bw"><div class="bv">${x.val ? (x.val >= 1000 ? (x.val/1000).toFixed(1) + 'k' : x.val) : ''}</div>
-        <div class="bar" style="height:${Math.round(x.val / maxV * 100)}%"></div>
+      `<div class="bw" title="${x.rot}, ${x.dia}: ${money(x.val)}">
+        <div class="bv">${x.val ? (x.val >= 1000 ? (x.val/1000).toFixed(1) + 'k' : x.val) : ''}</div>
+        <div class="bar" data-h="${Math.round(x.val / maxV * 100)}"></div>
         <div class="bl">${x.rot}</div></div>`).join('');
+    // anima as barras crescendo
+    requestAnimationFrame(() => document.querySelectorAll('#salesChart .bar').forEach(b => { b.style.height = b.dataset.h + '%'; }));
 
     // Estoque baixo (<= 3)
     const baixo = prods.filter(p => (p.stock || 0) <= 3).sort((a, b) => a.stock - b.stock);
@@ -274,12 +387,9 @@
     // guarda para exportar
     renderDashboard._orders = orders;
   }
-  function tile(k, v, gold) {
-    return `<div class="tile"><div class="k">${k}</div><div class="v${gold ? ' gold' : ''}">${v}</div></div>`;
-  }
 
   // Exportar pedidos em CSV
-  document.getElementById('exportBtn').addEventListener('click', () => {
+  function exportCSV() {
     const orders = renderDashboard._orders || [];
     if (!orders.length) { toast('Nenhum pedido para exportar'); return; }
     const linhas = [['Pedido', 'Data', 'Cliente', 'Status', 'Itens', 'Total']];
@@ -295,18 +405,21 @@
     a.click();
     URL.revokeObjectURL(a.href);
     toast('CSV baixado ✓');
-  });
+  }
+  document.getElementById('exportBtn').addEventListener('click', exportCSV);
+  document.getElementById('exportBtn2').addEventListener('click', exportCSV);
 
   // ---- Lista de produtos ----
   async function renderList() {
     const list = await Store.products();
     document.getElementById('pCount').textContent = '(' + list.length + ')';
-    document.getElementById('plist').innerHTML = list.map(p => `
+    document.getElementById('tabProdCount').textContent = list.length;
+    document.getElementById('plist').innerHTML = list.length ? list.map(p => `
       <div class="prow">
         <div class="th">${p.image?`<img src="${p.image}" alt="">`:(p.glyph||'📦')}</div>
         <div class="pi">
           <div class="pn">${p.name}</div>
-          <div class="pm">${p.brand||''} · ${CATS[p.cat]||p.cat}</div>
+          <div class="pm">${p.brand||''} · ${CATS[p.cat]||p.cat}${(p.stock||0)<=3?` · <span style="color:var(--bad)">estoque ${p.stock||0}</span>`:''}</div>
         </div>
         <div style="text-align:right; margin-left:8px">
           <div class="pp">${money(p.price)}</div>
@@ -315,24 +428,41 @@
           <button class="mini" data-edit="${p.id}">Editar</button>
           <button class="mini del" data-del="${p.id}">Excluir</button>
         </div>
-      </div>`).join('');
+      </div>`).join('') : '<div class="empty">Nenhum produto ainda. Clique em "+ Novo".</div>';
     document.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => edit(b.dataset.edit)));
     document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => del(b.dataset.del)));
   }
 
+  // ---- Pedidos ----
+  let curOrdFilter = 'todos';
   async function renderOrders() {
     const box = document.getElementById('ordersBox');
     box.innerHTML = '<div class="empty">Carregando pedidos…</div>';
     const orders = await Store.orders();
     document.getElementById('oCount').textContent = '(' + orders.length + ')';
-    if (orders.length===0) { box.innerHTML = '<div class="empty">Nenhum pedido ainda.</div>'; return; }
-    box.innerHTML = orders.map(o => `
+    document.getElementById('tabOrdCount').textContent = orders.length;
+
+    // Filtros por status
+    const filtros = [['todos','Todos'], ...ORDER_STATUS.map(s=>[s.key, s.label]), ['cancelado','Cancelado']];
+    document.getElementById('ordFilters').innerHTML = filtros.map(([k,l]) => {
+      const n = k==='todos' ? orders.length : orders.filter(o => (o.status||'novo')===k).length;
+      return `<button class="chip ${k===curOrdFilter?'active':''}" data-of="${k}">${l} (${n})</button>`;
+    }).join('');
+    document.querySelectorAll('[data-of]').forEach(c => c.addEventListener('click', () => { curOrdFilter = c.dataset.of; renderOrders(); }));
+
+    const shown = orders.filter(o => curOrdFilter==='todos' || (o.status||'novo')===curOrdFilter);
+    if (shown.length===0) { box.innerHTML = '<div class="empty">Nenhum pedido' + (curOrdFilter!=='todos'?' com esse status':'') + '.</div>'; return; }
+    box.innerHTML = shown.map(o => `
       <div class="order">
-        <div class="oh"><span>#${String(o.id).slice(-6)} · ${o.email||o.name||'cliente'}</span><span>${o.date}</span></div>
+        <div class="oh">
+          <span>#${String(o.id).slice(-6)} · ${o.email||o.name||'cliente'}</span>
+          <span>${o.date}</span>
+        </div>
+        <div style="margin:6px 0 10px"><span class="stbadge st-${o.status||'novo'}" data-badge="${o.id}">${statusLabel(o.status)}</span></div>
         <div class="oi">${o.items.map(i=>`${i.qty}× ${i.name}${i.sub?' ('+i.sub+')':''}`).join('<br>')}</div>
         <div class="ot">Total: ${money(o.total)}</div>
         <div style="margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap">
-          <span style="font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute)">Status</span>
+          <span style="font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-mute)">Mudar status</span>
           <select class="ostatus" data-id="${o.id}" style="flex:1; min-width:150px; background:var(--ground); border:1px solid var(--line); border-radius:8px; color:var(--ink); padding:8px 10px; font-size:13.5px; font-family:inherit">
             ${ORDER_STATUS.map(s=>`<option value="${s.key}" ${o.status===s.key?'selected':''}>${s.label}</option>`).join('')}
             <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
@@ -341,8 +471,13 @@
       </div>`).join('');
     box.querySelectorAll('.ostatus').forEach(sel => sel.addEventListener('change', async () => {
       sel.disabled = true;
-      try { await Store.updateOrderStatus(sel.dataset.id, sel.value); toast('Status atualizado ✓'); }
-      catch (e) { alert('Não deu para atualizar: ' + friendlyError(e)); }
+      try {
+        await Store.updateOrderStatus(sel.dataset.id, sel.value);
+        const badge = box.querySelector(`[data-badge="${sel.dataset.id}"]`);
+        if (badge) { badge.className = 'stbadge st-' + sel.value; badge.textContent = statusLabel(sel.value); }
+        toast('Status atualizado ✓');
+        renderDashboard();
+      } catch (e) { alert('Não deu para atualizar: ' + friendlyError(e)); }
       finally { sel.disabled = false; }
     }));
   }
@@ -356,7 +491,9 @@
     F('fFile').value=''; document.getElementById('fFileHint').textContent='Envie uma foto (vai para o Supabase Storage) — ou cole um link abaixo.';
     updateImgPreview();
   }
-  document.getElementById('newBtn').addEventListener('click', () => { clearForm(); F('fName').focus(); });
+  function novoProduto(){ setTab('products'); clearForm(); F('fName').focus(); }
+  document.getElementById('newBtn').addEventListener('click', novoProduto);
+  document.getElementById('newBtn2').addEventListener('click', novoProduto);
   document.getElementById('cancelBtn').addEventListener('click', clearForm);
 
   // ---- Foto: pré-visualização e upload ----
@@ -387,6 +524,7 @@
 
   async function edit(id) {
     const p = await Store.product(id); if(!p) return;
+    setTab('products');
     F('fId').value=p.id; F('fName').value=p.name||''; F('fBrand').value=p.brand||''; F('fOrigin').value=p.origin||'';
     F('fCat').value=p.cat||'cosmeticos'; F('fPrice').value=p.price||''; F('fWas').value=p.was||''; F('fBadge').value=p.badge||'';
     F('fGlyph').value=p.glyph||''; F('fImage').value=p.image||''; F('fRating').value=p.rating??5; F('fReviews').value=p.reviews??0;
@@ -394,13 +532,13 @@
     F('fStock').value=p.stock??1; F('fBest').checked=!!p.bestseller;
     F('editorTitle').textContent='Editar: ' + p.name;
     updateImgPreview();
-    window.scrollTo({ top:0, behavior:'smooth' });
+    document.querySelector('.editor').scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
   async function del(id) {
     const p = await Store.product(id);
     if (confirm('Excluir "' + (p?p.name:'produto') + '"? Isso não pode ser desfeito.')) {
-      try { await Store.deleteProduct(id); await renderList(); toast('Produto excluído'); }
+      try { await Store.deleteProduct(id); await renderList(); renderDashboard(); toast('Produto excluído'); }
       catch (err) { alert('Não foi possível excluir: ' + friendlyError(err)); }
     }
   }
@@ -431,7 +569,7 @@
     btn.disabled = true;
     try {
       await Store.upsertProduct(prod);
-      await renderList(); clearForm(); toast('Produto salvo ✓');
+      await renderList(); renderDashboard(); clearForm(); toast('Produto salvo ✓');
       F('editMsg').innerHTML='';
     } catch (err) {
       F('editMsg').innerHTML = '<div class="form-msg err">Não foi possível salvar: ' + friendlyError(err) + '</div>';
@@ -443,7 +581,7 @@
     if (confirm('Restaurar o catálogo para os produtos de exemplo? Isso APAGA os produtos atuais do banco e recria os 8 originais.')) {
       const btn = document.getElementById('resetBtn');
       btn.disabled = true;
-      try { await Store.seedDefaults(); await renderList(); toast('Catálogo restaurado'); }
+      try { await Store.seedDefaults(); await renderList(); renderDashboard(); toast('Catálogo restaurado'); }
       catch (err) { alert('Não foi possível restaurar: ' + friendlyError(err)); }
       finally { btn.disabled = false; }
     }

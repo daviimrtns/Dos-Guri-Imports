@@ -12043,7 +12043,8 @@ const Ch = `
   color: color-mix(in srgb, var(--gold, #e8c07d) 85%, #fff); }
 .hc-name { font-family: var(--serif, Georgia, serif); font-size: clamp(18px, 2.6vw, 24px);
   color: #fff; line-height: 1.15; }
-.hc-price { font-family: var(--serif, Georgia, serif); font-size: 20px;
+.hc-price { font-family: var(--price, "Segoe UI", system-ui, sans-serif); font-size: 21px;
+  font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em;
   color: var(--gold, #e8c07d); }
 
 .hc-arrow { position: absolute; top: 46%; transform: translateY(-50%); z-index: 3;

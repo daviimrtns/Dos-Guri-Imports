@@ -10,6 +10,9 @@
   --shadow: 0 24px 60px -28px rgba(0,0,0,.75);
   --serif: "Didot", "Bodoni MT", "Playfair Display", "Hoefler Text", Garamond, "Times New Roman", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Fonte dos preços: sans-serif limpa; o tabular-nums (aplicado nos seletores
+     de preço) deixa os números alinhados, com aspecto mais profissional. */
+  --price: "Segoe UI", var(--sans);
   --maxw: 1240px;
 }
 :root[data-theme="dark"] {
@@ -116,14 +119,14 @@ footer { padding: 46px 0 34px; border-top: 1px solid rgba(255,255,255,.08); marg
 .citem .th img { width: 100%; height: 100%; object-fit: cover; }
 .citem .cn { font-size: 13.5px; font-weight: 600; }
 .citem .csub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
-.citem .cp { font-size: 13px; color: var(--gold); margin-top: 3px; font-family: var(--serif); }
+.citem .cp { font-size: 13px; color: var(--gold); margin-top: 3px; font-family: var(--price); font-weight: 600; font-variant-numeric: tabular-nums; }
 .citem .rm { margin-left: auto; background: none; border: none; color: var(--ink-mute); font-size: 12px; align-self: flex-start; }
 .citem .rm:hover { color: var(--sale); }
 .cart-empty { text-align: center; color: var(--ink-mute); padding: 60px 20px; font-size: 14px; }
 .drawer-foot { padding: 20px 22px 24px; border-top: 1px solid var(--line); }
 .sumrow { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-soft); padding: 4px 0; }
 .sumrow.total { font-size: 17px; color: var(--ink); margin-top: 8px; }
-.sumrow.total b { font-family: var(--serif); font-weight: 400; }
+.sumrow.total b { font-family: var(--price); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .drawer-foot .btn.solid { width: 100%; margin-top: 14px; }
 
 /* ---------- Product cards (grid) ---------- */
@@ -142,7 +145,7 @@ footer { padding: 46px 0 34px; border-top: 1px solid rgba(255,255,255,.08); marg
 .stars { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-mute); }
 .stars .s { color: var(--gold); letter-spacing: 1px; }
 .price { display: flex; align-items: baseline; gap: 9px; margin-top: 4px; }
-.price .now { font-family: var(--serif); font-size: 22px; }
+.price .now { font-family: var(--price); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .price .was { font-size: 13px; color: var(--ink-mute); text-decoration: line-through; }
 .install { font-size: 12px; color: var(--ink-soft); }
 .card .foot { margin-top: auto; padding-top: 12px; }
@@ -232,7 +235,7 @@ footer { padding: 46px 0 34px; border-top: 1px solid rgba(255,255,255,.08); marg
 .search-preview .sp-name { font-size: 14px; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .search-preview .sp-brand { font-size: 12px; color: var(--ink-mute); }
-.search-preview .sp-price { font-family: var(--serif); font-size: 15px;
-  color: var(--gold); white-space: nowrap; }
+.search-preview .sp-price { font-family: var(--price); font-size: 15px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em; color: var(--gold); white-space: nowrap; }
 .search-preview .sp-empty { padding: 16px; color: var(--ink-mute);
   font-size: 14px; text-align: center; }
