@@ -11,7 +11,7 @@ const money = (n) =>
 
 // Catálogo de reserva: usado quando o Supabase está vazio/offline. As fotos
 // ficam em images/ e já vêm com fundo claro — por isso object-contain sobre o
-// gradiente vermelho fica ótimo.
+// gradiente escuro (preto com dourado) fica ótimo.
 const FALLBACK = [
   { name: 'Fone Bluetooth ANC Pro', brand: 'AudioLab', price: 749, image: 'images/fone.jpg', glyph: '🎧' },
   { name: 'Smartphone Ultra 256GB', brand: 'Nexon', price: 3299, image: 'images/celular.jpg', glyph: '📱' },
@@ -152,8 +152,8 @@ export default function HeroCarousel() {
 // com hc- para não colidir com o resto do site. Usa as variáveis do tema.
 const CSS = `
 .hc-root { position: absolute; inset: 0; overflow: hidden; border-radius: inherit;
-  background: radial-gradient(120% 90% at 70% 15%, color-mix(in srgb, #b0121a 55%, transparent), transparent 60%),
-              linear-gradient(160deg, #6b0d12, #2a0508 85%); }
+  background: radial-gradient(120% 90% at 70% 15%, color-mix(in srgb, var(--gold, #C6A15B) 26%, transparent), transparent 60%),
+              linear-gradient(160deg, var(--ground-2, #1C1815), var(--card, #201B17) 85%); }
 .hc-viewport { overflow: hidden; height: 100%; }
 .hc-container { display: flex; height: 100%; touch-action: pan-y pinch-zoom; }
 .hc-slide { position: relative; flex: 0 0 100%; min-width: 0; height: 100%;
